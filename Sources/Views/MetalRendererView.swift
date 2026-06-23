@@ -278,41 +278,42 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         let eyeHeight = leftEye.height
         let composeStart = CACurrentMediaTime()
 
-        let sbsTexture = metalPipeline.createTexture(
-            width: sbsWidth,
-            height: sbsHeight,
-            pixelFormat: .bgra8Unorm
-        )
-
         let cmdBuffer = metalPipeline.commandQueue.makeCommandBuffer()!
-        let blitEncoder = cmdBuffer.makeBlitCommandEncoder()!
-
-        blitEncoder.copy(
-            from: leftEye,
-            sourceSlice: 0,
-            sourceLevel: 0,
-            sourceOrigin: MTLOriginMake(0, 0, 0),
-            sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
-            to: sbsTexture,
-            destinationSlice: 0,
-            destinationLevel: 0,
-            destinationOrigin: MTLOriginMake(0, 0, 0)
-        )
-
-        blitEncoder.copy(
-            from: rightEye,
-            sourceSlice: 0,
-            sourceLevel: 0,
-            sourceOrigin: MTLOriginMake(0, 0, 0),
-            sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
-            to: sbsTexture,
-            destinationSlice: 0,
-            destinationLevel: 0,
-            destinationOrigin: MTLOriginMake(eyeWidth, 0, 0)
-        )
-        blitEncoder.endEncoding()
 
         if isTestMode {
+            let sbsTexture = metalPipeline.createTexture(
+                width: sbsWidth,
+                height: sbsHeight,
+                pixelFormat: .bgra8Unorm
+            )
+
+            let blitEncoder = cmdBuffer.makeBlitCommandEncoder()!
+
+            blitEncoder.copy(
+                from: leftEye,
+                sourceSlice: 0,
+                sourceLevel: 0,
+                sourceOrigin: MTLOriginMake(0, 0, 0),
+                sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
+                to: sbsTexture,
+                destinationSlice: 0,
+                destinationLevel: 0,
+                destinationOrigin: MTLOriginMake(0, 0, 0)
+            )
+
+            blitEncoder.copy(
+                from: rightEye,
+                sourceSlice: 0,
+                sourceLevel: 0,
+                sourceOrigin: MTLOriginMake(0, 0, 0),
+                sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
+                to: sbsTexture,
+                destinationSlice: 0,
+                destinationLevel: 0,
+                destinationOrigin: MTLOriginMake(eyeWidth, 0, 0)
+            )
+            blitEncoder.endEncoding()
+
             cmdBuffer.commit()
             cmdBuffer.waitUntilCompleted()
 
@@ -354,6 +355,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
             )
 
             testHarnessRecorder?.appendFrame(sbsPixelBuffer, timing: timing)
+            metalPipeline.releaseTextures([textures.video, textures.depth])
         } else {
             guard let drawable = currentDrawable else {
                 cmdBuffer.commit()
@@ -374,12 +376,6 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
             cmdBuffer.present(drawable)
             cmdBuffer.commit()
-        }
-
-        // Clean up textures — sbsTexture readback may span frames for test mode
-        if !isTestMode {
-            metalPipeline.releaseTextures([textures.video, textures.depth, sbsTexture])
-        } else {
             metalPipeline.releaseTextures([textures.video, textures.depth])
         }
         stereoComposer.releaseTextures()

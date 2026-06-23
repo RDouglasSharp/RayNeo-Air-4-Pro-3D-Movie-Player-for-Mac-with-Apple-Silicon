@@ -43,5 +43,10 @@ struct MainWindowView: View {
             .padding(.vertical, 8)
             .background(Color.black.opacity(0.8))
         }
+        .onAppear {
+            #if STEREO_AUTOPLAY
+            appDelegate.loadVideoAndAutoPlay(at: AppDelegate.autoPlayURL)
+            #endif
+        }
     }
 }

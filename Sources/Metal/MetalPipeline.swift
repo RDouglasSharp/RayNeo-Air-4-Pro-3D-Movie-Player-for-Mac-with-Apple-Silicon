@@ -73,45 +73,40 @@ public class MetalPipeline {
     ) -> MTLTexture {
         let width = CVPixelBufferGetWidth(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
+
+        if pixelFormat == .invalid {
+            logDebug("createTexture: INVALID pixel format, returning empty\n")
+            let desc = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: .bgra8Unorm,
+                width: width,
+                height: height,
+                mipmapped: false
+            )
+            return device.makeTexture(descriptor: desc) ?? device.makeTexture(descriptor: desc)!
+        }
+
+        // IOSurface FIRST — CVPixelBufferGetIOSurface does NOT require locking
+        if let surfaceUnmanaged = CVPixelBufferGetIOSurface(pixelBuffer) {
+            logDebug("createTexture: IOSurface detected, GPU path\n")
+            return createTextureFromIOSurface(pixelBuffer: pixelBuffer, width: width, height: height, pixelFormat: pixelFormat)
+        }
+
+        // No IOSurface — fallback to empty GPU-safe texture.
+        // CPU replaceRegion path is unreliable on Apple Silicon:
+        // CVPixelBufferGetIOSurface may return nil even for GPU-only tiled buffers,
+        // and replaceRegion on those buffers crashes in AGX driver (nil pointer deref).
         let desc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: pixelFormat,
             width: width,
             height: height,
             mipmapped: false
         )
-        desc.width = width
-        desc.height = height
         desc.storageMode = .private
-
-        if desc.pixelFormat == .invalid {
-            return device.makeTexture(descriptor: desc)!
-        }
-
+        desc.usage = .shaderRead
+        logDebug("createTexture: no IOSurface, empty GPU fallback w=\(width) h=\(height)\n")
         guard let texture = device.makeTexture(descriptor: desc) else {
             fatalError("Failed to create texture from CVPixelBuffer")
         }
-
-        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
-
-        guard let srcBase = CVPixelBufferGetBaseAddress(pixelBuffer) else {
-            logDebug("createTexture: nil base addr pixelFormat=\(pixelFormat.rawValue) w=\(width) h=\(height)\n")
-            // Try IOSurface fallback for GPU-only pixel buffers
-            return createTextureFromIOSurface(pixelBuffer: pixelBuffer, width: width, height: height, pixelFormat: pixelFormat)
-        }
-        let srcBytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-        let dstBytesPerRow = texture.width * 4
-        if srcBytesPerRow < texture.width * 4 {
-            logDebug("createTexture: srcBytesPerRow \(srcBytesPerRow) < dst \(dstBytesPerRow)\n")
-            return texture
-        }
-        texture.replace(
-            region: MTLRegionMake2D(0, 0, texture.width, texture.height),
-            mipmapLevel: 0,
-            withBytes: srcBase,
-            bytesPerRow: srcBytesPerRow
-        )
-
         return texture
     }
 
@@ -132,7 +127,12 @@ public class MetalPipeline {
             return device.makeTexture(descriptor: desc)!
         }
         let surface = surfaceUnmanaged.takeUnretainedValue()
+        let isoW = IOSurfaceGetWidth(surface)
+        let isoH = IOSurfaceGetHeight(surface)
+        let isoBpr = IOSurfaceGetBytesPerRow(surface)
+        logDebug("createTextureIOSurface: iso w=\(isoW) h=\(isoH) bpr=\(isoBpr) fmt=\(pixelFormat.rawValue)\n")
 
+        // IOSurface-backed textures require .shared storage mode
         let desc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: pixelFormat,
             width: width,
@@ -140,40 +140,28 @@ public class MetalPipeline {
             mipmapped: false
         )
         desc.usage = [.shaderRead]
-        desc.storageMode = .private
+        desc.storageMode = .shared
 
-        // Metal API: create MTLTexture that references IOSurface directly
+        // Metal API: create MTLTexture that references IOSurface directly (GPU→GPU path)
         if let sharedTexture = device.makeTexture(descriptor: desc, iosurface: surface, plane: 0) {
-            logDebug("createTextureIOSurface: shared w=\(width) h=\(height)\n")
+            logDebug("createTextureIOSurface: SHARED OK w=\(width) h=\(height)\n")
             return sharedTexture
         }
 
-        // Fallback: create texture and copy from IOSurface memory
-        guard let texture = device.makeTexture(descriptor: desc) else {
-            return device.makeTexture(
-                descriptor: MTLTextureDescriptor.texture2DDescriptor(
-                    pixelFormat: pixelFormat,
-                    width: width,
-                    height: height,
-                    mipmapped: false
-                )
-            )!
-        }
+        // Shared path failed — IOSurface is GPU-only and CPU cannot access it.
+        // Return an empty texture to avoid crash from CPU-copy of GPU memory.
+        logDebug("createTextureIOSurface: makeTexture+iosurface FAILED w=\(width) h=\(height)\n")
 
-        guard UnsafeMutableRawPointer(IOSurfaceGetBaseAddress(surface)) != nil else {
-            logDebug("createTextureIOSurface: IOSurfaceGetBaseAddress=nil w=\(width) h=\(height)\n")
-            return texture
-        }
-        let base = UnsafeMutableRawPointer(IOSurfaceGetBaseAddress(surface))!
-        let bpr = IOSurfaceGetBytesPerRow(surface)
-        texture.replace(
-            region: MTLRegionMake2D(0, 0, width, height),
-            mipmapLevel: 0,
-            withBytes: base,
-            bytesPerRow: bpr
+        let fallbackDesc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: pixelFormat,
+            width: width,
+            height: height,
+            mipmapped: false
         )
-        logDebug("createTextureIOSurface: copy w=\(width) h=\(height) bpr=\(bpr)\n")
-        return texture
+        if let empty = device.makeTexture(descriptor: fallbackDesc) {
+            return empty
+        }
+        return device.makeTexture(descriptor: fallbackDesc)!
     }
 
     /// Create a texture from pixel buffer, inferring pixel format from CV buffer.
@@ -195,6 +183,7 @@ public class MetalPipeline {
         default:
             metalFormat = .rgba8Unorm
         }
+        logDebug("createTexture auto: cvFmt=\(cvFormat) metalFmt=\(metalFormat.rawValue)\n")
         return createTexture(fromPixelBuffer: pixelBuffer, pixelFormat: metalFormat)
     }
 
@@ -388,13 +377,30 @@ public class MetalPipeline {
         _ = textures
     }
 
+    /// Return bytes per pixel for a given Metal pixel format.
+    func pixelBytesPerPixel(_ pixelFormat: MTLPixelFormat) -> Int {
+        switch pixelFormat {
+        case .bgra8Unorm, .rgba8Unorm:
+            return 4
+        case .r16Unorm, .r16Float:
+            return 2
+        case .r8Unorm, .r8Snorm:
+            return 1
+        default:
+            return 4
+        }
+    }
+
     /// Package video frame and depth map into a TexturePack.
     public func packageAll(
         videoFrame: CVPixelBuffer,
         depthMap: CVPixelBuffer
     ) -> TexturePack {
+        logDebug("pkgAll start: videoFmt=\(CVPixelBufferGetPixelFormatType(videoFrame)) depthFmt=\(CVPixelBufferGetPixelFormatType(depthMap))\n")
         let videoTexture = createTexture(fromPixelBuffer: videoFrame)
-        let depthTexture = createTexture(fromPixelBuffer: depthMap, pixelFormat: .r32Float)
+        logDebug("pkgAll video OK\n")
+        let depthTexture = createTexture(fromPixelBuffer: depthMap)
+        logDebug("pkgAll depth OK\n")
         return TexturePack(video: videoTexture, depth: depthTexture)
     }
 }

@@ -148,6 +148,10 @@ final class AppDelegate: NSObject, ObservableObject, NSApplicationDelegate {
     @Published var appState = AppState()
     var metalRenderer: MetalRendererView?
     
+    #if STEREO_AUTOPLAY
+    static let autoPlayURL = URL(fileURLWithPath: "/Users/doug/Movies/GracieAbramsThatsSoTrueLiveAtRadioCityMusicHall.mp4")
+    #endif
+    
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
     }
@@ -188,6 +192,32 @@ final class AppDelegate: NSObject, ObservableObject, NSApplicationDelegate {
                 )
                 self.appState.pipelineStatus = "Video loaded — press Space to play"
                 self.appState.isPlaying = false
+            }
+        }
+    }
+    
+    /// DEBUG: Auto-load video and start playback immediately.
+    func loadVideoAndAutoPlay(at url: URL) {
+        guard let renderer = metalRenderer else {
+            appState.pipelineStatus = "Error: MetalRenderer not ready"
+            return
+        }
+        
+        renderer.loadVideo(at: url)
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            let info = renderer.videoInfo
+            DispatchQueue.main.async {
+                self.appState.updateVideoInfo(
+                    width: info.width,
+                    height: info.height,
+                    codec: info.codec,
+                    fps: info.fps,
+                    duration: info.duration
+                )
+                self.appState.pipelineStatus = "Auto-playing \(url.lastPathComponent)"
+                self.appState.isPlaying = true
+                renderer.start()
             }
         }
     }

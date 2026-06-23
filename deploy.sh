@@ -4,6 +4,12 @@ set -e
 APP_NAME="StereoPlayer3D"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP="$DIR/$APP_NAME.app"
+BUILD_CONFIG="release"
+
+# Auto-play flag for debug builds
+if [ "${AUTOPLAY}" = "1" ]; then
+  BUILD_CONFIG="debug"
+fi
 
 # Clean old build
 rm -rf "$APP"
@@ -13,7 +19,8 @@ mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources"
 
 # Copy binary
-cp "$DIR/.build/arm64-apple-macosx/release/$APP_NAME" "$APP/Contents/MacOS/"
+BINARY="$DIR/.build/arm64-apple-macosx/$BUILD_CONFIG/$APP_NAME"
+cp "$BINARY" "$APP/Contents/MacOS/"
 
 # Create minimal but functional Info.plist
 cat > "$APP/Contents/Info.plist" << 'PLIST'
