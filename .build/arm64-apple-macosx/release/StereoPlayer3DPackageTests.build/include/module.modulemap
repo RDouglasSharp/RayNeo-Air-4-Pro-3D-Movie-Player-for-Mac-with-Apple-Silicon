@@ -1,0 +1,3 @@
+module StereoPlayer3DPackageTests {
+    header "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3DPackageTests.build/include/StereoPlayer3DPackageTests-Swift.h"
+}

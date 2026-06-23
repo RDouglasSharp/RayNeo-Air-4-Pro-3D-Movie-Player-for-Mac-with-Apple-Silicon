@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/primary.swiftdeps"
+  },
+  "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.d",
+    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.dia"
+  }
+}
