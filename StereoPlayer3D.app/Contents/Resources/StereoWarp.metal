@@ -56,20 +56,58 @@ kernel void stereoWarp(
         return;
     }
 
-    // Map content-region pixel to source UV coordinates
+    // Map content-region pixel to source coordinates (CV space: row 0 = top)
     float cx = (float)gid.x - params.contentOffsetX;
     float cy = (float)gid.y - params.contentOffsetY;
     float srcX = (cx / params.contentWidth) * params.inputWidth;
     float srcY = (cy / params.contentHeight) * params.inputHeight;
 
-    float depth = depthTexture.read(uint2((int)srcX, (int)srcY)).r;
-    float disparity = params.baseline * params.focalLength / max(depth * params.focalLength, 1.0f);
+    // Metal texture y=0 = bottom, CVPixelBuffer row 0 = top — flip Y for sampling
+    float flipY = params.inputHeight - srcY;
 
-    float leftSrcX = srcX + disparity * 0.5f;
-    float rightSrcX = srcX - disparity * 0.5f;
+    float depth = depthTexture.read(uint2((int)srcX, (int)flipY)).r;
 
-    float4 leftPixel = bilinearSampleTex(sourceTexture, params.inputWidth, params.inputHeight, leftSrcX, srcY);
-    float4 rightPixel = bilinearSampleTex(sourceTexture, params.inputWidth, params.inputHeight, rightSrcX, srcY);
+    // Relative disparity w.r.t. anchor plane (fillMode param reused as anchorDepth, default 0.5).
+    // Near objects (< anchor) shift; far objects (>= anchor) stay put.
+    // This provides a stable horizon and shifts only what should pop out.
+    float anchorDepth = params.fillMode;
+    float nearDepth = 0.1f;
+    float d = max(depth, nearDepth);
+    float disparity = 0.0f;
+    if (d < anchorDepth) {
+        disparity = params.baseline * params.focalLength * (1.0f / d - 1.0f / anchorDepth) / params.focalLength;
+    }
+
+    // HARD clamp — prevents ghosting from runaway warp at depth edges
+    disparity = clamp(disparity, 0.0f, 16.0f);
+
+    // Backward warp: left eye camera shifted left from source,
+    // so we sample from LEFT of current position (higher -X in source).
+    // Right eye camera shifted right — sample from RIGHT of current position.
+    float leftSrcX  = srcX - disparity;
+    float rightSrcX = srcX + disparity;
+    float warpY     = flipY;
+
+    // Out-of-bounds source coords = occlusion hole → write alpha=0 for fillHoles
+    bool leftOoc = (leftSrcX < 0.0f || leftSrcX >= params.inputWidth);
+    bool rightOoc = (rightSrcX < 0.0f || rightSrcX >= params.inputWidth);
+
+    float4 leftPixel;
+    float4 rightPixel;
+
+    if (leftOoc) {
+        leftPixel = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    } else {
+        leftPixel = bilinearSampleTex(sourceTexture, params.inputWidth, params.inputHeight, leftSrcX, warpY);
+        leftPixel.a = 1.0f;
+    }
+
+    if (rightOoc) {
+        rightPixel = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    } else {
+        rightPixel = bilinearSampleTex(sourceTexture, params.inputWidth, params.inputHeight, rightSrcX, warpY);
+        rightPixel.a = 1.0f;
+    }
 
     leftEyeTexture.write(leftPixel, gid);
     rightEyeTexture.write(rightPixel, gid);

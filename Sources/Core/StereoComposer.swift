@@ -22,7 +22,7 @@ public class StereoComposer {
 
     public init(
         pipeline: MetalPipeline,
-        baseline: Float = 64.0,
+        baseline: Float = 16.0,
         focalLength: Float = 512.0,
         fillMode: FillMode = .nearest
     ) {
@@ -100,11 +100,12 @@ public class StereoComposer {
         encoder.setTexture(leftEye, index: 2)
         encoder.setTexture(rightEye, index: 3)
 
+        let anchorDepth: Float = 0.5
         let params: [Float] = [
             Float(videoWidth), Float(videoHeight),
             Float(eyeW), Float(eyeH),
             baseline, focalLength,
-            0,
+            anchorDepth,
             contentOffsetX, contentOffsetY,
             contentWidth, contentHeight
         ]
@@ -120,6 +121,33 @@ public class StereoComposer {
         let threadGroupSize = MTLSize(width: 8, height: 8, depth: 1)
         encoder.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: threadGroupSize)
         encoder.endEncoding()
+
+        // Fill occlusion holes (alpha=0) left by out-of-bounds stereo warp
+        if let fillFunc = library.makeFunction(name: "fillHoles"),
+           let fillPipeline = try? pipeline.device.makeComputePipelineState(function: fillFunc),
+           let fillEncoder = commandBuffer.makeComputeCommandEncoder() {
+            fillEncoder.setComputePipelineState(fillPipeline)
+            fillEncoder.setTexture(leftEye, index: 0)
+            fillEncoder.setTexture(depth, index: 1)
+            params.withUnsafeBytes { ptr in
+                fillEncoder.setBytes(ptr.baseAddress!, length: MemoryLayout<Float>.stride * 11, index: 4)
+            }
+            fillEncoder.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: threadGroupSize)
+            fillEncoder.endEncoding()
+        }
+
+        if let fillFunc2 = library.makeFunction(name: "fillHoles"),
+           let fillPipeline2 = try? pipeline.device.makeComputePipelineState(function: fillFunc2),
+           let fillEncoderR = commandBuffer.makeComputeCommandEncoder() {
+            fillEncoderR.setComputePipelineState(fillPipeline2)
+            fillEncoderR.setTexture(rightEye, index: 0)
+            fillEncoderR.setTexture(depth, index: 1)
+            params.withUnsafeBytes { ptr in
+                fillEncoderR.setBytes(ptr.baseAddress!, length: MemoryLayout<Float>.stride * 11, index: 4)
+            }
+            fillEncoderR.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: threadGroupSize)
+            fillEncoderR.endEncoding()
+        }
 
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
