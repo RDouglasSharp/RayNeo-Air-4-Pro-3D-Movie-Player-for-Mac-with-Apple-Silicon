@@ -15,7 +15,10 @@ struct StereoPlayer3DApp: App {
             MainWindowView()
                 .environmentObject(appDelegate)
                 .environmentObject(appDelegate.appState)
-                .frame(minWidth: 1920, minHeight: 1080)
+                .frame(minWidth: 320, minHeight: 180)
+                .onExitCommand {
+                    NSApplication.shared.terminate(nil)
+                }
         }
         .commands {
             CommandGroup(replacing: .newItem) {}
@@ -145,17 +148,13 @@ final class AppState: ObservableObject {
 
 // MARK: - App Delegate
 
-final class AppDelegate: NSObject, ObservableObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, ObservableObject {
     @Published var appState = AppState()
     var metalRenderer: MetalRendererView?
     
     #if STEREO_AUTOPLAY
     static let autoPlayURL = URL(fileURLWithPath: "/Users/doug/Movies/GracieAbramsThatsSoTrueLiveAtRadioCityMusicHall.mp4")
     #endif
-    
-    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
-        return true
-    }
     
     func showOpenPanel() {
         let panel = NSOpenPanel()
