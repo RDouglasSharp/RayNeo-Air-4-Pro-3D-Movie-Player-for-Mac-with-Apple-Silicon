@@ -91,6 +91,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
         },
         {
@@ -156,6 +160,7 @@
       "objects" : [
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoPlayer3DApp.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o",
@@ -224,6 +229,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
         },
         {
@@ -279,6 +288,7 @@
       "sources" : [
         "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
@@ -494,6 +504,7 @@
       "-c",
       "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
@@ -710,6 +721,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
         },
         {
@@ -769,6 +784,10 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o"
         },
         {
           "kind" : "file",
@@ -849,6 +868,10 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o"
         },
         {
           "kind" : "file",

@@ -1,5 +1,6 @@
 /Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift
+/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift

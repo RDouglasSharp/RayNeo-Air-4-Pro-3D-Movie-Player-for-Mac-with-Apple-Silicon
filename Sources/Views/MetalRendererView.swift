@@ -17,6 +17,32 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     private var ffmpegDecoder: AVFoundationDecoder!
     private var renderTimer: Timer?
 
+    // Background processing queue + lock
+    private let pipelineQueue = DispatchQueue(label: "com.stereoplayer.pipeline", qos: .userInitiated)
+    private let resultLock = NSLock()
+
+    /// Latest processed frame result.
+    private struct ProcessedFrame {
+        let videoTexture: MTLTexture
+        let depthTexture: MTLTexture
+        let leftEye: MTLTexture
+        let rightEye: MTLTexture
+        let timing: FrameTiming
+    }
+
+    private var processedFrame: ProcessedFrame? {
+        get { resultLock.lock(); defer { resultLock.unlock() }; return _processedFrame }
+        set { resultLock.lock(); _processedFrame = newValue; resultLock.unlock() }
+    }
+    private var _processedFrame: ProcessedFrame?
+
+    /// Whether background pipeline is currently running.
+    private var isPipelineRunning: Bool {
+        get { resultLock.lock(); defer { resultLock.unlock() }; return _isPipelineRunning }
+        set { resultLock.lock(); _isPipelineRunning = newValue; resultLock.unlock() }
+    }
+    private var _isPipelineRunning = false
+
     // MARK: - Test Harness State
     /// When true, pipeline renders to file instead of MTKView screen.
     private var isTestMode = false
@@ -217,11 +243,12 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     }
     
     /// Manually drive the render loop with a Timer.
+    /// Higher frequency ensures responsive transitions; heavy work runs on background queue.
     private func setupDisplayLink() {
         guard window != nil else { return }
         removeDisplayLink()
         renderTimer = Timer.scheduledTimer(withTimeInterval: 1/60.0, repeats: true) { [weak self] _ in
-            guard let self = self, !self.isPaused else { return }
+            guard let self = self else { return }
             self.draw(in: self)
         }
         logDebug("DISPLAYLINK added\n")
@@ -275,125 +302,74 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
     // MARK: - MTKViewDelegate (Rendering)
 
+    /// Atomically take and clear processedFrame to prevent double-render.
+    @inline(__always)
+    private func takeProcessedFrame() -> ProcessedFrame? {
+        resultLock.lock()
+        defer { resultLock.unlock() }
+        let f = _processedFrame
+        _processedFrame = nil
+       return f
+    }
+
     public func draw(in view: MTKView) {
-        logDebug("DRAW fired, isPaused=\(isPaused), isHidden=\(isHidden), drawableSize=\(drawableSize)\n")
-        guard let videoFrame = ffmpegDecoder.decodeFrame() else {
-            logDebug("DRAW early: no frame\n")
-            return
+        if !drawableSize.width.isFinite || !drawableSize.height.isFinite {
+            drawableSize = (bounds.size.width > 0 && bounds.size.height > 0) ? bounds.size : CGSize(width: 3840, height: 1080)
         }
-        currentFrame = videoFrame
 
-        let vf = CVPixelBufferGetPixelFormatType(videoFrame)
-        let vw = CVPixelBufferGetWidth(videoFrame)
-        let vh = CVPixelBufferGetHeight(videoFrame)
-        let vb = CVPixelBufferGetBaseAddress(videoFrame) != nil ? "OK" : "NIL"
-        let vbr = CVPixelBufferGetBytesPerRow(videoFrame)
-        logDebug("VIDEO: format=\(vf) w=\(vw) h=\(vh) base=\(vb) bppr=\(vbr)\n")
-        let frameStart = CACurrentMediaTime()
-
-        let decodeStart = CACurrentMediaTime()
-
-        // 1. Core ML depth estimation (or synthetic fallback)
-        var depthMap: CVPixelBuffer
-        let depthStart = CACurrentMediaTime()
-        if let depthEst = depthEstimator {
-            depthMap = depthEst.estimateDepth(from: videoFrame)
-        } else {
-            depthMap = DepthEstimator.generateDepthMap(
-                width: CVPixelBufferGetWidth(videoFrame),
-                height: CVPixelBufferGetHeight(videoFrame),
-                focalLength: 50.0
-            )
-            if !syntheticDepthWarned {
-                syntheticDepthWarned = true
-                logDebug("WARNING: Running in SYNTHETIC DEPTH MODE — no real depth estimation available\n")
-                logDebug("         Stereoscopy will use a synthetic radial gradient (not real scene-aware)\n")
-            }
+        if !isPaused, !isPipelineRunning, ffmpegDecoder != nil {
+            kickOffProcessing()
         }
-        let df = CVPixelBufferGetPixelFormatType(depthMap)
-        let dw = CVPixelBufferGetWidth(depthMap)
-        let dh = CVPixelBufferGetHeight(depthMap)
-        let db = CVPixelBufferGetBaseAddress(depthMap) != nil ? "OK" : "NIL"
-        let dbr = CVPixelBufferGetBytesPerRow(depthMap)
-        logDebug("DEPTH: format=\(df) w=\(dw) h=\(dh) base=\(db) bppr=\(dbr)\n")
-        let depthMs = (CACurrentMediaTime() - depthStart) * 1000
 
-        // 2. Package textures from CVPixelBuffers
-        let textures = metalPipeline.packageAll(
-            videoFrame: videoFrame,
-            depthMap: depthMap
-        )
-
-        // 3. Stereo warp + compose (1920×1080 per-eye, with letterbox/pillarbox)
-        let warpStart = CACurrentMediaTime()
-        let (leftEye, rightEye) = stereoComposer.compose(
-            video: textures.video,
-            depth: textures.depth
-        )
-        let warpMs = (CACurrentMediaTime() - warpStart) * 1000
-
-        // SBS output: 3840×1080 (two 1920×1080 views side-by-side)
-        let sbsWidth = 3840
-        let sbsHeight = 1080
-        let eyeWidth = leftEye.width
-        let eyeHeight = leftEye.height
-        let composeStart = CACurrentMediaTime()
+        guard let frame = takeProcessedFrame(), let drawable = currentDrawable else { return }
 
         let cmdBuffer = metalPipeline.commandQueue.makeCommandBuffer()!
 
         if isTestMode {
+            let sbsWidth = 3840
+            let sbsHeight = 1080
+            let eyeWidth = frame.leftEye.width
+            let eyeHeight = frame.leftEye.height
+
             let sbsTexture = metalPipeline.createTexture(
-                width: sbsWidth,
-                height: sbsHeight,
+                width: sbsWidth, height: sbsHeight,
                 pixelFormat: .bgra8Unorm
             )
-
-            let blitEncoder = cmdBuffer.makeBlitCommandEncoder()!
-
-            blitEncoder.copy(
-                from: leftEye,
-                sourceSlice: 0,
-                sourceLevel: 0,
+            let blit = cmdBuffer.makeBlitCommandEncoder()!
+            blit.copy(
+                from: frame.leftEye,
+                sourceSlice: 0, sourceLevel: 0,
                 sourceOrigin: MTLOriginMake(0, 0, 0),
                 sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
                 to: sbsTexture,
-                destinationSlice: 0,
-                destinationLevel: 0,
+                destinationSlice: 0, destinationLevel: 0,
                 destinationOrigin: MTLOriginMake(0, 0, 0)
             )
-
-            blitEncoder.copy(
-                from: rightEye,
-                sourceSlice: 0,
-                sourceLevel: 0,
+            blit.copy(
+                from: frame.rightEye,
+                sourceSlice: 0, sourceLevel: 0,
                 sourceOrigin: MTLOriginMake(0, 0, 0),
                 sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
                 to: sbsTexture,
-                destinationSlice: 0,
-                destinationLevel: 0,
+                destinationSlice: 0, destinationLevel: 0,
                 destinationOrigin: MTLOriginMake(eyeWidth, 0, 0)
             )
-            blitEncoder.endEncoding()
-
+            blit.endEncoding()
             cmdBuffer.commit()
             cmdBuffer.waitUntilCompleted()
 
             guard let sbsPixelBuffer = createPixelBuffer(from: sbsTexture, width: sbsWidth, height: sbsHeight) else {
-                logDebug("Warning: failed to capture SBS frame for test harness\n")
+                metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
+                stereoComposer.releaseTextures()
                 return
             }
 
             let recordStart = CACurrentMediaTime()
             testFrameCount += 1
 
-            let decodeMs = (depthStart - decodeStart) * 1000
-            let composeMs = (CACurrentMediaTime() - composeStart) * 1000
-            let recordMs = (CACurrentMediaTime() - recordStart) * 1000
             let frameEnd = CACurrentMediaTime()
-            let totalMs = (frameEnd - frameStart) * 1000
-
             let fps: Double
-            frameTimestamps.append(frameStart)
+            frameTimestamps.append(frameEnd)
             if frameTimestamps.count > 30 {
                 frameTimestamps.removeFirst()
                 let span = frameTimestamps.last! - frameTimestamps.first!
@@ -406,40 +382,105 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
             let timing = FrameTiming(
                 frame: testFrameCount,
                 timestamp: frameEnd - testStartTime,
-                decodeMs: decodeMs,
-                depthMs: depthMs,
-                warpMs: warpMs,
-                composeMs: composeMs,
-                recordMs: recordMs,
-                totalMs: totalMs,
+                decodeMs: frame.timing.decodeMs,
+                depthMs: frame.timing.depthMs,
+                warpMs: frame.timing.warpMs,
+                composeMs: frame.timing.composeMs,
+                recordMs: (CACurrentMediaTime() - recordStart) * 1000,
+                totalMs: frame.timing.totalMs,
                 fps: fps
             )
-
             testHarnessRecorder?.appendFrame(sbsPixelBuffer, timing: timing)
-            metalPipeline.releaseTextures([textures.video, textures.depth])
+            metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
         } else {
-            guard let drawable = currentDrawable else {
-                cmdBuffer.commit()
-                return
-            }
-
             let descriptor = currentRenderPassDescriptor
             descriptor?.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
 
             if let renderPipelineState = createRenderPipeline(), let desc = descriptor {
                 let renderEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)!
                 renderEncoder.setRenderPipelineState(renderPipelineState)
-                renderEncoder.setFragmentTexture(leftEye, index: 0)
-                renderEncoder.setFragmentTexture(rightEye, index: 1)
-                renderEncoder.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4)
+                renderEncoder.setFragmentTexture(frame.leftEye, index: 0)
+                renderEncoder.setFragmentTexture(frame.rightEye, index: 1)
+                renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
                 renderEncoder.endEncoding()
             }
 
             cmdBuffer.present(drawable)
             cmdBuffer.commit()
-            metalPipeline.releaseTextures([textures.video, textures.depth])
+            metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
         }
         stereoComposer.releaseTextures()
+    }
+
+    private func kickOffProcessing() {
+        guard !isPipelineRunning else { return }
+        isPipelineRunning = true
+
+        pipelineQueue.async { [weak self] in
+            self?.processFrame()
+        }
+    }
+
+    private func processFrame() {
+        defer { isPipelineRunning = false }
+
+        guard let videoFrame = ffmpegDecoder.decodeFrame() else { return }
+        currentFrame = videoFrame
+
+        let frameStart = CACurrentMediaTime()
+
+        let depthStart = CACurrentMediaTime()
+        let depthMap: CVPixelBuffer
+        if let depthEst = depthEstimator {
+            depthMap = depthEst.estimateDepth(from: videoFrame)
+        } else {
+            depthMap = DepthEstimator.generateDepthMap(
+                width: CVPixelBufferGetWidth(videoFrame),
+                height: CVPixelBufferGetHeight(videoFrame),
+                focalLength: 50.0
+            )
+        }
+        let depthMs = (CACurrentMediaTime() - depthStart) * 1000
+
+        let textures = metalPipeline.packageAll(
+            videoFrame: videoFrame,
+            depthMap: depthMap
+        )
+
+        let warpStart = CACurrentMediaTime()
+        let (leftEye, rightEye) = stereoComposer.compose(
+            video: textures.video,
+            depth: textures.depth
+        )
+        let warpMs = (CACurrentMediaTime() - warpStart) * 1000
+
+        let totalMs = (CACurrentMediaTime() - frameStart) * 1000
+
+        let timing = FrameTiming(
+            frame: Int(totalMs / 1000 * 60),
+            timestamp: CACurrentMediaTime(),
+            decodeMs: 0,
+            depthMs: depthMs,
+            warpMs: warpMs,
+            composeMs: 0,
+            recordMs: 0,
+            totalMs: totalMs,
+            fps: totalMs > 0 ? 1000 / totalMs : 0
+        )
+
+        resultLock.lock()
+        _processedFrame = ProcessedFrame(
+            videoTexture: textures.video,
+            depthTexture: textures.depth,
+            leftEye: leftEye,
+            rightEye: rightEye,
+            timing: timing
+        )
+        resultLock.unlock()
+
+        DispatchQueue.main.async { [weak self] in
+            self?.needsDisplay = true
+        }
     }
 
     /// Copy MTLTexture → CVPixelBuffer (BGRA) for AVAssetWriter consumption.
