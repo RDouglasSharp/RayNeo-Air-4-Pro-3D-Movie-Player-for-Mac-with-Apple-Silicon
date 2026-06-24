@@ -28,6 +28,10 @@
 		<data>
 		6O02HfrbHvXVruEIpUzK6IuKnxQ=
 		</data>
+		<key>Resources/StereoWarp.metal</key>
+		<data>
+		Apdq3CK/rTy6Lp+hlXQUGVs8Un8=
+		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
@@ -64,6 +68,13 @@
 			<key>hash2</key>
 			<data>
 			oygHaNJQ+KDDjx9glxKE6WWLwADuuJfqsSbiC9fN7kY=
+			</data>
+		</dict>
+		<key>Resources/StereoWarp.metal</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7v7LJQ0Lxcd5XpB4JIyUkqV+K2hQzMnbZl3g0HJ3IiA=
 			</data>
 		</dict>
 	</dict>

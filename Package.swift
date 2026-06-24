@@ -21,7 +21,8 @@ let package = Package(
             dependencies: [],
             path: "Sources",
             resources: [
-                .process("Resources/")
+                .process("Resources/"),
+                .process("Metal/StereoWarp.metal"),
             ],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency=complete"),

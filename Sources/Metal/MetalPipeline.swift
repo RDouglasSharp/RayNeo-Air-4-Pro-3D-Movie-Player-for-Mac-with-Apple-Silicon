@@ -44,7 +44,34 @@ public class MetalPipeline {
             label: "com.stereoplayer.metal",
             qos: .userInitiated
         )
-        self.library = try? device.makeDefaultLibrary()
+        self.library = Self.loadLibrary(device: device)
+    }
+
+    private static func loadLibrary(device: MTLDevice) -> MTLLibrary? {
+        let fname = "StereoWarp"
+        if let url = Bundle.main.url(forResource: fname, withExtension: "metal") {
+            logDebug("METALLIB bundle URL: \(url.path)\n")
+            if let source = try? String(contentsOf: url, encoding: .utf8) {
+                do {
+                    let lib = try device.makeLibrary(source: source, options: nil)
+                    logDebug("METALLIB source compile OK: \(lib.functionNames)\n")
+                    return lib
+                } catch {
+                    logDebug("METALLIB source compile error: \(error.localizedDescription)\n")
+                }
+            } else {
+                logDebug("METALLIB cannot read source\n")
+            }
+        } else {
+            logDebug("METALLIB NOT IN BUNDLE: StereoWarp.metal missing from \(Bundle.main.bundlePath)\n")
+        }
+
+        if let lib = device.makeDefaultLibrary() {
+            logDebug("METALLIB default OK: \(lib.functionNames)\n")
+            return lib
+        }
+        logDebug("METALLIB exhausted — all paths failed\n")
+        return nil
     }
 
     public convenience init(device: MTLDevice) {
@@ -60,7 +87,9 @@ public class MetalPipeline {
             label: "com.stereoplayer.metal",
             qos: .userInitiated
         )
-        self.library = try? device.makeDefaultLibrary()
+        self.library = Self.loadLibrary(device: device)
+        print("MetalPipeline.init () done, library=\(library != nil ? "OK" : "nil")")
+        fflush(__stderrp)
     }
 
     // MARK: - Texture Creation
@@ -91,22 +120,45 @@ public class MetalPipeline {
             return createTextureFromIOSurface(pixelBuffer: pixelBuffer, width: width, height: height, pixelFormat: pixelFormat)
         }
 
-        // No IOSurface — fallback to empty GPU-safe texture.
-        // CPU replaceRegion path is unreliable on Apple Silicon:
-        // CVPixelBufferGetIOSurface may return nil even for GPU-only tiled buffers,
-        // and replaceRegion on those buffers crashes in AGX driver (nil pointer deref).
+        // No IOSurface — CPU upload via locked replaceRegion.
+        // The earlier crash (AGX nil pointer deref) came from calling replaceRegion
+        // WITHOUT locking the pixel buffer first, so CVPixelBufferGetBaseAddress
+        // could return null while the GPU/decoder still owned the memory.
+        // Locking first makes this path safe; storageMode must be .shared/.managed
+        // (NOT .private) since .private textures cannot be written from the CPU.
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+
+        guard let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer) else {
+            logDebug("createTexture: no IOSurface AND null base address, returning empty w=\(width) h=\(height)\n")
+            let desc = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: pixelFormat,
+                width: width,
+                height: height,
+                mipmapped: false
+            )
+            return device.makeTexture(descriptor: desc)!
+        }
+
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
         let desc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: pixelFormat,
             width: width,
             height: height,
             mipmapped: false
         )
-        desc.storageMode = .private
+        desc.storageMode = .shared
         desc.usage = .shaderRead
-        logDebug("createTexture: no IOSurface, empty GPU fallback w=\(width) h=\(height)\n")
         guard let texture = device.makeTexture(descriptor: desc) else {
             fatalError("Failed to create texture from CVPixelBuffer")
         }
+        texture.replace(region:
+            MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            withBytes: baseAddress,
+            bytesPerRow: bytesPerRow
+        )
+        logDebug("createTexture: no IOSurface, CPU replaceRegion OK w=\(width) h=\(height) bpr=\(bytesPerRow)\n")
         return texture
     }
 

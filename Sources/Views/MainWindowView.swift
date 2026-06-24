@@ -44,7 +44,9 @@ struct MainWindowView: View {
             .background(Color.black.opacity(0.8))
         }
         .onAppear {
+            logDebug("MAINWINDOW onAppear fire\n")
             #if STEREO_AUTOPLAY
+            logDebug("MAINWINDOW calling loadVideoAndAutoPlay: \(AppDelegate.autoPlayURL.path)\n")
             appDelegate.loadVideoAndAutoPlay(at: AppDelegate.autoPlayURL)
             #endif
         }

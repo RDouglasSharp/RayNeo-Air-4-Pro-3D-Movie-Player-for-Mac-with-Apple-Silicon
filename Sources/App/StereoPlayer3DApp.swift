@@ -2,6 +2,7 @@ import SwiftUI
 import MetalKit
 import AVFoundation
 import UniformTypeIdentifiers
+import Darwin
 
 // MARK: - Main App Entry Point
 
@@ -198,6 +199,7 @@ final class AppDelegate: NSObject, ObservableObject, NSApplicationDelegate {
     
     /// DEBUG: Auto-load video and start playback immediately.
     func loadVideoAndAutoPlay(at url: URL) {
+        logDebug("AUTOPLAY called, metalRenderer=\(metalRenderer != nil ? "OK" : "nil")\n")
         guard let renderer = metalRenderer else {
             appState.pipelineStatus = "Error: MetalRenderer not ready"
             return
@@ -205,9 +207,13 @@ final class AppDelegate: NSObject, ObservableObject, NSApplicationDelegate {
         
         renderer.loadVideo(at: url)
         
+        logDebug("AUTOPLAY async after video load\n")
         DispatchQueue.global(qos: .userInitiated).async {
+            logDebug("AUTOPLAY bg thread get videoInfo\n")
             let info = renderer.videoInfo
+            logDebug("AUTOPLAY bg thread got videoInfo\n")
             DispatchQueue.main.async {
+                logDebug("AUTOPLAY main thread update and start\n")
                 self.appState.updateVideoInfo(
                     width: info.width,
                     height: info.height,

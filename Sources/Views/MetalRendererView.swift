@@ -15,6 +15,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     private var depthEstimator: DepthEstimator?
     private var stereoComposer: StereoComposer!
     private var ffmpegDecoder: AVFoundationDecoder!
+    private var renderTimer: Timer?
 
     // MARK: - Test Harness State
     /// When true, pipeline renders to file instead of MTKView screen.
@@ -96,7 +97,8 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
     // MARK: - Initialization
 
-    public func setupMTKView() {
+    public     func setupMTKView() {
+        logDebug("SETUPMTK device=\(MTLCreateSystemDefaultDevice() != nil), frame=\(frame)\n")
         guard let mtlDevice = MTLCreateSystemDefaultDevice() else {
             fatalError("Metal not supported")
         }
@@ -117,7 +119,6 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         stereoComposer = StereoComposer(pipeline: metalPipeline)
 
         colorPixelFormat = .bgra8Unorm
-        sampleCount = 4
         framebufferOnly = false
         isPaused = true
         wantsLayer = true
@@ -145,11 +146,26 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     // MARK: - Video Playback
 
     func loadVideo(at url: URL) {
+        logDebug("LOADVIDEO before loadVideo\n")
         do {
             try ffmpegDecoder.loadVideo(at: url)
+            logDebug("LOADVIDEO after loadVideo\n")
             ffmpegDecoder.start()
-            self.isPaused = false
+            logDebug("LOADVIDEO after start\n")
+            // DON'T set isPaused=false yet — view may not be in window yet
+            logDebug("LOADVIDEO window=\(self.window != nil), bounds=\(bounds)\n")
+            // Defer until view is installed in window and resized
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                guard let self = self, self.window != nil, self.bounds.size.width > 0 else {
+                    logDebug("LOADVIDEO deferred SKIP: window=\(self?.window != nil), bounds=\(self?.bounds ?? .zero)\n")
+                    return
+                }
+                self.isPaused = false
+                self.needsDisplay = true
+                logDebug("LOADVIDEO deferred isPaused=false, needsDisplay=true, window=true, bounds=\(self.bounds)\n")
+            }
         } catch {
+            logDebug("LOADVIDEO ERROR: \(error.localizedDescription)\n")
             fatalError("Failed to load video: \(error)")
         }
     }
@@ -164,9 +180,11 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     }
 
     func start() {
+        logDebug("START called, decoder=\(ffmpegDecoder != nil), paused=\(isPaused)\n")
         guard ffmpegDecoder != nil else { return }
         ffmpegDecoder.start()
         isPaused = false
+        logDebug("START done, paused=\(isPaused)\n")
     }
 
     func stop() {
@@ -180,6 +198,50 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         }
         ffmpegDecoder.stop()
         isPaused = true
+    }
+    
+    // MARK: - NSView lifecycle
+
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        super.viewWillMove(toWindow: newWindow)
+        if newWindow == nil {
+            removeDisplayLink()
+        }
+    }
+    
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        logDebug("VIEWWINDOW window=\(window != nil), bounds=\(bounds)\n")
+        if window != nil {
+            setupDisplayLink()
+        }
+    }
+    
+    /// Manually drive the render loop with a Timer.
+    private func setupDisplayLink() {
+        guard window != nil else { return }
+        removeDisplayLink()
+        renderTimer = Timer.scheduledTimer(withTimeInterval: 1/60.0, repeats: true) { [weak self] _ in
+            guard let self = self, !self.isPaused else { return }
+            self.draw(in: self)
+        }
+        logDebug("DISPLAYLINK added\n")
+    }
+    
+    private func removeDisplayLink() {
+        renderTimer?.invalidate()
+        renderTimer = nil
+    }
+    
+    @objc private func renderLoop() {
+        if isPaused == false {
+            draw(in: self)
+        }
+    }
+    
+    override func layout() {
+        super.layout()
+        logDebug("VIEWLAYOUT bounds=\(bounds)\n")
     }
 
     func pause() {
@@ -215,8 +277,9 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     // MARK: - MTKViewDelegate (Rendering)
 
     public func draw(in view: MTKView) {
-        // Decode new frame
+        logDebug("DRAW fired, isPaused=\(isPaused), isHidden=\(isHidden), drawableSize=\(drawableSize)\n")
         guard let videoFrame = ffmpegDecoder.decodeFrame() else {
+            logDebug("DRAW early: no frame\n")
             return
         }
         currentFrame = videoFrame
@@ -422,6 +485,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         guard let library = metalPipeline.library,
               let vertexFunction = library.makeFunction(name: "SBSVertex"),
               let fragmentFunction = library.makeFunction(name: "SBSFragment") else {
+            logDebug("RPIPELINE FAIL: library=\(metalPipeline.library != nil), verts=\(metalPipeline.library?.makeFunction(name: "SBSVertex") != nil), frags=\(metalPipeline.library?.makeFunction(name: "SBSFragment") != nil)\n")
             return nil
         }
 
@@ -433,8 +497,10 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         do {
             let state = try metalPipeline.device.makeRenderPipelineState(descriptor: pipelineDescriptor)
             _cachedRenderPipeline = state
+            logDebug("RPIPELINE OK\n")
             return state
         } catch {
+            logDebug("RPIPELINE error: \(error.localizedDescription)\n")
             return nil
         }
     }

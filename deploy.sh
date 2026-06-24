@@ -11,6 +11,11 @@ if [ "${AUTOPLAY}" = "1" ]; then
   BUILD_CONFIG="debug"
 fi
 
+# Build
+echo "Building..."
+cd "$DIR"
+swift build -c "$BUILD_CONFIG" -Xswiftc -D -Xswiftc STEREO_AUTOPLAY
+
 # Clean old build
 rm -rf "$APP"
 
@@ -66,6 +71,12 @@ PLIST
 if [ -d "$DIR/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc" ]; then
     cp -r "$DIR/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc" "$APP/Contents/Resources/"
     echo "Copied Core ML model"
+fi
+
+# Copy Metal shader source
+if [ -f "$DIR/Sources/Metal/StereoWarp.metal" ]; then
+    cp "$DIR/Sources/Metal/StereoWarp.metal" "$APP/Contents/Resources/"
+    echo "Copied Metal shader: StereoWarp.metal"
 fi
 
 # Strip debug symbols for smaller binary

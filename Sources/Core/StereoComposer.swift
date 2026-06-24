@@ -80,10 +80,13 @@ public class StereoComposer {
             let metalFunc = library.makeFunction(name: "stereoWarp"),
             let computePipeline = try? pipeline.device.makeComputePipelineState(function: metalFunc)
         else {
+            logDebug("COMPOSE FAIL: library=\(pipeline.library != nil), func=\(pipeline.library?.makeFunction(name: "stereoWarp") != nil)\n")
             self.leftTexture = leftEye
             self.rightTexture = rightEye
             return (leftEye, rightEye)
         }
+
+        logDebug("COMPOSE warp shader OK\n")
 
         guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
             self.leftTexture = leftEye

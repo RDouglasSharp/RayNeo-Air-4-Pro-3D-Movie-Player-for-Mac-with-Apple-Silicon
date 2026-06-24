@@ -35,6 +35,20 @@
         }
       ]
     },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/StereoWarp.metal" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/StereoWarp.metal"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/StereoWarp.metal"
+        }
+      ]
+    },
     "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/model.mlmodel" : {
       "inputs" : [
         {
@@ -195,6 +209,8 @@
         "-sdk",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
         "-g",
+        "-D",
+        "STEREO_AUTOPLAY",
         "-Xcc",
         "-isysroot",
         "-Xcc",
@@ -342,6 +358,8 @@
         "-sdk",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
         "-g",
+        "-D",
+        "STEREO_AUTOPLAY",
         "-Xcc",
         "-isysroot",
         "-Xcc",
@@ -435,6 +453,8 @@
         "-sdk",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
         "-g",
+        "-D",
+        "STEREO_AUTOPLAY",
         "-Xcc",
         "-isysroot",
         "-Xcc",
@@ -526,6 +546,8 @@
       "-sdk",
       "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
       "-g",
+      "-D",
+      "STEREO_AUTOPLAY",
       "-Xcc",
       "-isysroot",
       "-Xcc",
@@ -578,6 +600,8 @@
       "-sdk",
       "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
       "-g",
+      "-D",
+      "STEREO_AUTOPLAY",
       "-Xcc",
       "-isysroot",
       "-Xcc",
@@ -632,6 +656,8 @@
       "-sdk",
       "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
       "-g",
+      "-D",
+      "STEREO_AUTOPLAY",
       "-Xcc",
       "-isysroot",
       "-Xcc",

@@ -59,7 +59,7 @@ public class AVFoundationDecoder: VideoDecoderProtocol {
 
         let outputSettings: [String: Any] = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-            kCVPixelBufferMetalCompatibilityKey as String: false
+            kCVPixelBufferMetalCompatibilityKey as String: true
         ]
         videoTrackOutput = AVAssetReaderTrackOutput(
             track: videoTrack,
@@ -161,7 +161,7 @@ public class AVFoundationDecoder: VideoDecoderProtocol {
 
         let outputSettings: [String: Any] = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-            kCVPixelBufferMetalCompatibilityKey as String: false
+            kCVPixelBufferMetalCompatibilityKey as String: true
         ]
         videoTrackOutput = AVAssetReaderTrackOutput(
             track: videoTrack,
