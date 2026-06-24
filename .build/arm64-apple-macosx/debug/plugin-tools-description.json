@@ -1,0 +1,977 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.xctest/Contents/MacOS/StereoPlayer3DPackageTests",
+      "packagePath" : "/Users/doug/Code/StereoPlayer3D",
+      "productName" : "StereoPlayer3DPackageTests"
+    }
+  ],
+  "copyCommands" : {
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/StereoWarp.metal" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/StereoWarp.metal"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/StereoWarp.metal"
+        }
+      ]
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/coremldata.bin" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/coremldata.bin"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/coremldata.bin"
+        }
+      ]
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/model.mil" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/model.mil"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/model.mil"
+        }
+      ]
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/weight.bin" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/weights/weight.bin"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D_StereoPlayer3D.bundle/weight.bin"
+        }
+      ]
+    }
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.StereoPlayer3D-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/sources",
+      "importPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DerivedSources/resource_bundle_accessor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<StereoPlayer3D-arm64-apple-macosx-debug.module-resources>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "StereoPlayer3D",
+      "moduleOutputPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3D.swiftmodule",
+      "objects" : [
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoPlayer3DApp.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/AVFoundationDecoder.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DebugLogger.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DepthEstimator.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoComposer.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/TestHarnessRecorder.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoFrame.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoPlayer.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalPipeline.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalReadbacks.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MainWindowView.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalRendererView.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalView.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/resource_bundle_accessor.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j18",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE",
+        "-module-cache-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "StereoPlayer3D_main",
+        "-swift-version",
+        "5",
+        "-DSTEREO_AUTOPLAY",
+        "-enable-experimental-feature",
+        "StrictConcurrency=complete",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "stereoplayer3d"
+      ],
+      "outputFileMapPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoPlayer3DApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DebugLogger.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DepthEstimator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoComposer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/TestHarnessRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoFrame.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalPipeline.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalReadbacks.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MainWindowView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalRendererView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/resource_bundle_accessor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3D.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DerivedSources/resource_bundle_accessor.swift"
+      ],
+      "tempsPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.StereoPlayer3DPackageTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/sources",
+      "importPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3DTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "StereoPlayer3DPackageTests",
+      "moduleOutputPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3DPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j18",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/include/StereoPlayer3DPackageTests-Swift.h",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "stereoplayer3d"
+      ],
+      "outputFileMapPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3DPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.StereoPlayer3DTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/sources",
+      "importPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/CoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/MetalPipelineTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "StereoPlayer3DTests",
+      "moduleOutputPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3DTests.swiftmodule",
+      "objects" : [
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/CoreTests.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/MetalPipelineTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j18",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "stereoplayer3d"
+      ],
+      "outputFileMapPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/CoreTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/MetalPipelineTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules/StereoPlayer3DTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/CoreTests.swift",
+        "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/MetalPipelineTests.swift"
+      ],
+      "tempsPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "StereoPlayer3D" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "StereoPlayer3D",
+      "-package-name",
+      "stereoplayer3d",
+      "-c",
+      "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DerivedSources/resource_bundle_accessor.swift",
+      "-I",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j18",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE",
+      "-module-cache-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "StereoPlayer3D_main",
+      "-swift-version",
+      "5",
+      "-DSTEREO_AUTOPLAY",
+      "-enable-experimental-feature",
+      "StrictConcurrency=complete",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "stereoplayer3d",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ],
+    "StereoPlayer3DPackageTests" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "StereoPlayer3DPackageTests",
+      "-package-name",
+      "stereoplayer3d",
+      "-c",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j18",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/include/StereoPlayer3DPackageTests-Swift.h",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "stereoplayer3d",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ],
+    "StereoPlayer3DTests" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "StereoPlayer3DTests",
+      "-package-name",
+      "stereoplayer3d",
+      "-c",
+      "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/CoreTests.swift",
+      "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/MetalPipelineTests.swift",
+      "-I",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j18",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "stereoplayer3d",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "StereoPlayer3D" : [
+
+    ],
+    "StereoPlayer3DPackageTests" : [
+      "StereoPlayer3DTests",
+      "StereoPlayer3D"
+    ],
+    "StereoPlayer3DTests" : [
+      "StereoPlayer3D"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D-entitlement.plist"
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DerivedSources/resource_bundle_accessor.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/sources"
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DebugLogger.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DepthEstimator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MainWindowView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalPipeline.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalReadbacks.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalRendererView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoComposer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoPlayer3DApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/TestHarnessRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoFrame.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/resource_bundle_accessor.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.product/Objects.LinkFileList"
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/sources"
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DebugLogger.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/DepthEstimator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MainWindowView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalPipeline.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalReadbacks.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalRendererView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/MetalView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoComposer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/StereoPlayer3DApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/TestHarnessRecorder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoFrame.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/VideoPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3D.build/resource_bundle_accessor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/CoreTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/MetalPipelineTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/CoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Tests/StereoPlayer3DTests/MetalPipelineTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/StereoPlayer3DTests.build/sources"
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+    }
+  }
+}

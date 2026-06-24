@@ -48,26 +48,70 @@ public final class DepthEstimator {
         let width = CVPixelBufferGetWidth(imageBuffer)
         let height = CVPixelBufferGetHeight(imageBuffer)
 
-        var outputImageBuffer: CVPixelBuffer!
-        CVPixelBufferCreate(
-            kCFAllocatorDefault,
-            width,
-            height,
-            kCVPixelFormatType_32BGRA,
-            nil,
-            nil,
-            &outputImageBuffer
-        )
+        let outputImageBuffer: CVPixelBuffer = {
+            var outBuffer: CVPixelBuffer?
+            CVPixelBufferCreate(
+                kCFAllocatorDefault,
+                width,
+                height,
+                kCVPixelFormatType_32BGRA,
+                nil,
+                &outBuffer
+            )
+            return outBuffer!
+        }()
 
-        let multiArray: MLMultiArray = model.prediction(image: imageBuffer).depth
+        // Create MLMultiArray input from pixel buffer (shape: [1, 3, height, width], type: Float32)
+        let inputShape: [NSNumber] = [
+            NSNumber(value: 1), NSNumber(value: 3),
+            NSNumber(value: height), NSNumber(value: width)
+        ]
+        guard let inputArray = try? MLMultiArray(shape: inputShape, dataType: .float32) else {
+            return outputImageBuffer
+        }
 
-        let byteCount: Int = imageHeight * imageWidth * 4
+        CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+        guard let srcBase = CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0) else {
+            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+            return outputImageBuffer
+        }
+        let srcBPR = CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 0)
+
+        for y in 0..<height {
+            let row = srcBase.advanced(by: y * srcBPR)
+            for x in 0..<width {
+                let p = row.advanced(by: x * 4)
+                let b: Float = Float(p.loadUnaligned(as: UInt8.self)) / 255.0
+                let g: Float = Float(p.advanced(by: 1).loadUnaligned(as: UInt8.self)) / 255.0
+                let r: Float = Float(p.advanced(by: 2).loadUnaligned(as: UInt8.self)) / 255.0
+                let yIdx = NSNumber(value: y)
+                let xIdx = NSNumber(value: x)
+                inputArray[[0, 0, yIdx, xIdx]] = NSNumber(value: r)
+                inputArray[[0, 1, yIdx, xIdx]] = NSNumber(value: g)
+                inputArray[[0, 2, yIdx, xIdx]] = NSNumber(value: b)
+            }
+        }
+        CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+
+        guard let featureValue = try? MLFeatureValue(multiArray: inputArray),
+              let inputFeatures = try? MLDictionaryFeatureProvider(dictionary: ["image": featureValue]) else {
+            return outputImageBuffer
+        }
+        guard let prediction = try? model.prediction(from: inputFeatures),
+              let multiArray = prediction.featureValue(for: "depth")?.multiArrayValue else {
+            return outputImageBuffer
+        }
+
+        let byteCount: Int = height * width * 4
         var buffers = [UInt8](repeating: 0, count: byteCount)
-        CMDoubleToCMUCharScaled(
-            cmDouble: multiArray,
-            cmUChar: &buffers,
-            type: 5 // Color component type
-        )
+        let count = multiArray.count
+        for i in 0..<min(count, byteCount / MemoryLayout<Double>.size) {
+            let v = multiArray[i].doubleValue
+            buffers[i * 4]    = UInt8(max(0, min(255, v * 255.0)))
+            buffers[i * 4 + 1] = buffers[i * 4]
+            buffers[i * 4 + 2] = buffers[i * 4]
+            buffers[i * 4 + 3] = 255
+        }
 
         CVPixelBufferLockBaseAddress(outputImageBuffer, [])
         if let outputBaseAddress = CVPixelBufferGetBaseAddress(outputImageBuffer) {
@@ -86,15 +130,12 @@ public final class DepthEstimator {
         let height = CVPixelBufferGetHeight(pixelBuffer)
 
         var outPixelBuffer: CVPixelBuffer?
-        let attrs: [String: Any] = [
-            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
-        ]
         let status = CVPixelBufferCreate(
             kCFAllocatorDefault,
             width,
             height,
             kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
-            attrs as CFDictionary,
+            nil,
             &outPixelBuffer
         )
         guard status == kCVReturnSuccess, let output = outPixelBuffer else {
@@ -122,11 +163,11 @@ public final class DepthEstimator {
             let yRow = yBase.advanced(by: y * yBytesPerRow)
             for x in 0..<width {
                 let p = srcRow.advanced(by: x * 4)
-                let b = p.loadUnaligned(as: UInt8.self)
-                let g = p.advanced(by: 1).loadUnaligned(as: UInt8.self)
-                let r = p.advanced(by: 2).loadUnaligned(as: UInt8.self)
-                let yVal = UInt8(Double(r) * 0.299 + Double(g) * 0.587 + Double(b) * 0.114)
-                yRow.advanced(by: x).storeBytes(of: yVal, as: UInt8.self)
+                let b = Float(p.loadUnaligned(as: UInt8.self))
+                let g = Float(p.advanced(by: 1).loadUnaligned(as: UInt8.self))
+                let r = Float(p.advanced(by: 2).loadUnaligned(as: UInt8.self))
+                let yVal = r * 0.299 + g * 0.587 + b * 0.114
+                yRow.advanced(by: x).storeBytes(of: UInt8(yVal), as: UInt8.self)
             }
         }
 
@@ -150,24 +191,24 @@ public final class DepthEstimator {
     // MARK: - Depth Map Utilities
 
     /// Generate a synthetic depth gradient (for testing without actual depth model).
-    public func generateDepthMap(
+    public static func generateDepthMap(
         width: Int,
         height: Int,
         focalLength: Float
     ) -> CVPixelBuffer {
-        var depthBuffer: CVPixelBuffer!
-        let attrs: [String: Any] = [
-            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
-        ]
-        CVPixelBufferCreate(
-            kCFAllocatorDefault,
-            width,
-            height,
-            kCVPixelFormatType_32BGRA,
-            attrs as CFDictionary,
-            nil,
-            &depthBuffer
-        )
+        let depthBuffer: CVPixelBuffer = {
+            // No IOSurface backing — this buffer is written by CPU from Metal
+            var outBuffer: CVPixelBuffer?
+            CVPixelBufferCreate(
+                kCFAllocatorDefault,
+                width,
+                height,
+                kCVPixelFormatType_32BGRA,
+                nil,
+                &outBuffer
+            )
+            return outBuffer!
+        }()
 
         CVPixelBufferLockBaseAddress(depthBuffer, [])
         guard let baseAddress = CVPixelBufferGetBaseAddress(depthBuffer) else {

@@ -16,6 +16,12 @@
     "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swiftdeps",
     "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.dia"
   },
+  "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift": {
+    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o",
+    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger~partial.swiftmodule",
+    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swiftdeps",
+    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.dia"
+  },
   "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift": {
     "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swift.o",
     "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator~partial.swiftmodule",

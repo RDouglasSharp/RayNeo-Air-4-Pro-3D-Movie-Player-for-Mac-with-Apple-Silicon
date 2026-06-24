@@ -4,29 +4,17 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/.DS_Store</key>
+		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/coremldata.bin</key>
 		<data>
-		S4YXSaLgaoi+Wi+UTjRs8zXOyco=
+		mms3RMsccF0VQDu7x5/yocSafE8=
 		</data>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/.gitattributes</key>
+		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/model.mil</key>
 		<data>
-		AVGdH8lVGo25FB1i3kzItNs70bw=
+		x8zf35D6kYAXXqSY0R2uIzElQbU=
 		</data>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/model.mlmodel</key>
-		<data>
-		6tRz0xbjr6TqwbSrvSx5oMRdDFM=
-		</data>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/weights/weight.bin</key>
+		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/weights/weight.bin</key>
 		<data>
 		CG9Nosh4S+uh2nLTHieEWvi8bXc=
-		</data>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Manifest.json</key>
-		<data>
-		B0U4oUBRHSxiMnfuOL+Ac5XbSyU=
-		</data>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/README.md</key>
-		<data>
-		6O02HfrbHvXVruEIpUzK6IuKnxQ=
 		</data>
 		<key>Resources/StereoWarp.metal</key>
 		<data>
@@ -35,39 +23,25 @@
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/.gitattributes</key>
+		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/coremldata.bin</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Ea1++iSXXuSww8OjjtGHN/Blil91oKlnh7V2p4oCM2E=
+			joq4HzjFMxAXF2tH2SRU2rDcU6Z4b7MrMjDi5eUpOUc=
 			</data>
 		</dict>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/model.mlmodel</key>
+		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/model.mil</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			RKyXo+/P1SETGD+yhi/1nNA2jp7C4wqQpUmA3RFAcEI=
+			LYveRRiFrlFPMOSP6WOkGz2zAzNBcL9YDUMerXnSpfg=
 			</data>
 		</dict>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/weights/weight.bin</key>
+		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/weights/weight.bin</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			+mDZtqFVc09ZAp67iC/VTlSb+u41OcGpy9LLurZKD+0=
-			</data>
-		</dict>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Manifest.json</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			KIOuKQxI/pFtxezsrAOn2Ef6J3FlpJ71ZS+h0rnLVfc=
-			</data>
-		</dict>
-		<key>Resources/DepthAnythingV2SmallF16.mlmodelc/README.md</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			oygHaNJQ+KDDjx9glxKE6WWLwADuuJfqsSbiC9fN7kY=
 			</data>
 		</dict>
 		<key>Resources/StereoWarp.metal</key>

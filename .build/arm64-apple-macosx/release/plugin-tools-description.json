@@ -7,34 +7,6 @@
     }
   ],
   "copyCommands" : {
-    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/Manifest.json" : {
-      "inputs" : [
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Manifest.json"
-        }
-      ],
-      "outputs" : [
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/Manifest.json"
-        }
-      ]
-    },
-    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/README.md" : {
-      "inputs" : [
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/README.md"
-        }
-      ],
-      "outputs" : [
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/README.md"
-        }
-      ]
-    },
     "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/StereoWarp.metal" : {
       "inputs" : [
         {
@@ -49,17 +21,31 @@
         }
       ]
     },
-    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/model.mlmodel" : {
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/coremldata.bin" : {
       "inputs" : [
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/model.mlmodel"
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/coremldata.bin"
         }
       ],
       "outputs" : [
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/model.mlmodel"
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/coremldata.bin"
+        }
+      ]
+    },
+    "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/model.mil" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/model.mil"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D_StereoPlayer3D.bundle/model.mil"
         }
       ]
     },
@@ -67,7 +53,7 @@
       "inputs" : [
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/weights/weight.bin"
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Resources/models/DepthAnythingV2SmallF16.mlmodelc/weights/weight.bin"
         }
       ],
       "outputs" : [
@@ -102,6 +88,10 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
         },
         {
           "kind" : "file",
@@ -166,6 +156,7 @@
       "objects" : [
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoPlayer3DApp.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o",
@@ -234,6 +225,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swift.o"
         },
         {
@@ -285,6 +280,7 @@
       "sources" : [
         "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
@@ -503,6 +499,7 @@
       "-c",
       "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
@@ -723,6 +720,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift"
         },
         {
@@ -778,6 +779,10 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
         },
         {
           "kind" : "file",
@@ -854,6 +859,10 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
         },
         {
           "kind" : "file",
