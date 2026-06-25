@@ -1,15 +1,11 @@
 /Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift
-/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift
-/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift
+/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift
-/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift
-/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift
-/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift

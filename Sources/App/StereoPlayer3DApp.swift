@@ -12,7 +12,7 @@ struct StereoPlayer3DApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainWindowView()
+            MainWindowView(appState: appDelegate.appState)
                 .environmentObject(appDelegate)
                 .environmentObject(appDelegate.appState)
                 .frame(minWidth: 320, minHeight: 180)
@@ -151,7 +151,7 @@ final class AppDelegate: NSObject, ObservableObject {
     var rayNeoMonitor: RayNeoDisplayMonitor?
     
     #if STEREO_AUTOPLAY
-    static let autoPlayURL = URL(fileURLWithPath: "/Users/doug/Movies/GracieAbramsThatsSoTrueLiveAtRadioCityMusicHall.mp4")
+    static let autoPlayURL = URL(fileURLWithPath: "test.mp4")
     #endif
     
     func showOpenPanel() {
@@ -175,8 +175,8 @@ final class AppDelegate: NSObject, ObservableObject {
             appState.pipelineStatus = "Error: MetalRenderer not ready"
             return
         }
-        
-        renderer.loadVideo(at: url)
+
+        renderer.loadVideo(at: url, startPlayback: false)
         
         DispatchQueue.global(qos: .userInitiated).async {
             let info = renderer.videoInfo
@@ -228,7 +228,7 @@ final class AppDelegate: NSObject, ObservableObject {
     func togglePlayback() {
         guard let renderer = metalRenderer else { return }
         if appState.isPlaying {
-            renderer.stop()
+            renderer.pause()
             appState.isPlaying = false
         } else {
             renderer.start()

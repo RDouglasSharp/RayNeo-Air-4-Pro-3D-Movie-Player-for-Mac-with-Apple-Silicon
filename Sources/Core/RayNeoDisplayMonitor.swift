@@ -1,8 +1,10 @@
 import Cocoa
 
 /// Polls for RayNeo Air 4 Pro display (3840×1080 SBS mode).
-/// Waits for unmirrored state (two screens with different resolutions)
-/// before moving window to the glasses display.
+/// Only moves window when:
+///   - Display is 3840×1080
+///   - Display is NOT the main screen
+///   - Screens are NOT mirrored (different resolutions)
 /// Falls back to main screen at default size when glasses disconnect.
 final class RayNeoDisplayMonitor {
     private let targetWidth: CGFloat = 3840
@@ -16,19 +18,20 @@ final class RayNeoDisplayMonitor {
 
     /// Start polling for the RayNeo display.
     func startPolling() {
-        // Check immediately
         checkAndFire()
 
-        // Listen for screen configuration changes
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.checkAndFire()
+            // Wait 1s for screen to complete unmirror transition (resolutions update with delay)
+            guard let self = self else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                self.checkAndFire()
+            }
         }
 
-        // Poll every 2 seconds as backup
         pollingTimer = Timer.scheduledTimer(
             withTimeInterval: 2,
             repeats: true
@@ -38,14 +41,19 @@ final class RayNeoDisplayMonitor {
     }
 
     private func checkAndFire() {
-        guard let glasses = findRayNeoScreen() else {
+        guard let screens = obtainScreens() else { return }
+        guard screens.count >= 2 else { return }
+        guard isMirrorTest(screens) == false else { return }
+
+        guard let glasses = findRayNeoScreenIn(screens) else {
+            if isPinned, didLosingDisplay != nil {
                 isPinned = false
-                didLosingDisplay?(Void())
+                notifyLoss()
+            }
             return
         }
 
-        // Only fire when NOT mirrored (two screens with different resolutions)
-        guard !isMirrored() else { return }
+        guard isMain(glasses) == false else { return }
 
         if !isPinned {
             isPinned = true
@@ -54,16 +62,34 @@ final class RayNeoDisplayMonitor {
         }
     }
 
-    /// Check if screens are all the same resolution (mirrored state).
-    private func isMirrored() -> Bool {
-        guard NSScreen.screens.count >= 2 else { return false }
-        let first = NSScreen.screens[0].frame.size
-        for screen in NSScreen.screens {
+    private func obtainScreens() -> [NSScreen]? {
+        return NSScreen.screens
+    }
+
+    private func isMirrorTest(_ screens: [NSScreen]) -> Bool {
+        guard screens.count >= 2 else { return false }
+        let first = screens[0].frame.size
+        for screen in screens {
             let dw = abs(screen.frame.width - first.width)
             let dh = abs(screen.frame.height - first.height)
             if dw >= 2.0 || dh >= 2.0 { return false }
         }
         return true
+    }
+
+    private func isMain(_ screen: NSScreen) -> Bool {
+        return screen == NSScreen.main
+    }
+
+    private func findRayNeoScreenIn(_ screens: [NSScreen]) -> NSScreen? {
+        for screen in screens {
+            let w = screen.frame.width
+            let h = screen.frame.height
+            if abs(w - targetWidth) < 2.0 && abs(h - targetHeight) < 2.0 {
+                return screen
+            }
+        }
+        return nil
     }
 
     /// Stop polling.
@@ -76,11 +102,9 @@ final class RayNeoDisplayMonitor {
         }
     }
 
-    private func findRayNeoScreen() -> NSScreen? {
-        return NSScreen.screens.first {
-            let w = $0.frame.width
-            let h = $0.frame.height
-            return abs(w - targetWidth) < 2.0 && abs(h - targetHeight) < 2.0
+    private func notifyLoss() {
+        if let handler = didLosingDisplay {
+            handler(Void())
         }
     }
 

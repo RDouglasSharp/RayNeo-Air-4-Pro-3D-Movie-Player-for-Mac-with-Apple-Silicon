@@ -87,14 +87,6 @@
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
         },
         {
@@ -111,23 +103,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift"
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift"
         },
         {
           "kind" : "file",
@@ -163,17 +147,13 @@
       "moduleOutputPath" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/Modules/StereoPlayer3D.swiftmodule",
       "objects" : [
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoPlayer3DApp.swift.o",
-        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o",
-        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o",
-        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swift.o",
-        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.swift.o",
-        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MainWindowView.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalRendererView.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalView.swift.o",
@@ -199,7 +179,6 @@
         "StereoPlayer3D_main",
         "-swift-version",
         "5",
-        "-DSTEREO_AUTOPLAY",
         "-enable-experimental-feature",
         "StrictConcurrency=complete",
         "-I",
@@ -211,6 +190,8 @@
         "-sdk",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
         "-g",
+        "-D",
+        "STEREO_AUTOPLAY",
         "-Xcc",
         "-isysroot",
         "-Xcc",
@@ -230,14 +211,6 @@
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
         },
         {
@@ -254,23 +227,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o"
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.swift.o"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.swift.o"
         },
         {
           "kind" : "file",
@@ -296,17 +261,13 @@
       "prepareForIndexing" : false,
       "sources" : [
         "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
-        "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
-        "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
-        "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift",
-        "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift",
-        "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift",
@@ -373,6 +334,8 @@
         "-sdk",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
         "-g",
+        "-D",
+        "STEREO_AUTOPLAY",
         "-Xcc",
         "-isysroot",
         "-Xcc",
@@ -466,6 +429,8 @@
         "-sdk",
         "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
         "-g",
+        "-D",
+        "STEREO_AUTOPLAY",
         "-Xcc",
         "-isysroot",
         "-Xcc",
@@ -513,17 +478,13 @@
       "stereoplayer3d",
       "-c",
       "/Users/doug/Code/StereoPlayer3D/Sources/App/StereoPlayer3DApp.swift",
-      "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift",
-      "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
-      "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift",
-      "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift",
-      "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalRendererView.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Views/MetalView.swift",
@@ -549,7 +510,6 @@
       "StereoPlayer3D_main",
       "-swift-version",
       "5",
-      "-DSTEREO_AUTOPLAY",
       "-enable-experimental-feature",
       "StrictConcurrency=complete",
       "-I",
@@ -561,6 +521,8 @@
       "-sdk",
       "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
       "-g",
+      "-D",
+      "STEREO_AUTOPLAY",
       "-Xcc",
       "-isysroot",
       "-Xcc",
@@ -613,6 +575,8 @@
       "-sdk",
       "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
       "-g",
+      "-D",
+      "STEREO_AUTOPLAY",
       "-Xcc",
       "-isysroot",
       "-Xcc",
@@ -667,6 +631,8 @@
       "-sdk",
       "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
       "-g",
+      "-D",
+      "STEREO_AUTOPLAY",
       "-Xcc",
       "-isysroot",
       "-Xcc",
@@ -728,14 +694,6 @@
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift"
         },
         {
@@ -752,23 +710,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift"
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift"
         },
         {
           "kind" : "file",
@@ -798,14 +748,6 @@
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
         },
         {
@@ -819,10 +761,6 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.swift.o"
         },
         {
           "kind" : "file",
@@ -846,15 +784,11 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.swift.o"
         },
         {
           "kind" : "file",
@@ -886,14 +820,6 @@
         },
         {
           "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o"
-        },
-        {
-          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o"
         },
         {
@@ -907,10 +833,6 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.swift.o"
         },
         {
           "kind" : "file",
@@ -934,15 +856,11 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swift.o"
-        },
-        {
-          "kind" : "file",
-          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.swift.o"
         },
         {
           "kind" : "file",

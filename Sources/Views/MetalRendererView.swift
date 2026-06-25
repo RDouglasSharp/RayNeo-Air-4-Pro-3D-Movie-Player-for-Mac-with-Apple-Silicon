@@ -5,7 +5,7 @@ import AVFoundation
 import Darwin
 
 /// MTKView that drives the full stereo pipeline:
-/// FFmpeg decode → Core ML depth → Metal stereoWarp → SBS output
+/// AVPlayerItemVideoOutput → depth+warp (synchronous) → SBS output
 final class MetalRendererView: MTKView, MTKViewDelegate {
     var commandBuffer: MTLCommandBuffer?
     var currentFrame: CVPixelBuffer?
@@ -14,19 +14,9 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     private var metalPipeline: MetalPipeline!
     private var depthEstimator: DepthEstimator?
     private var stereoComposer: StereoComposer!
-    private var ffmpegDecoder: AVFoundationDecoder!
-    private var audioPlayer: AVPlayer?
-    private var renderTimer: Timer?
+    private var syncPlayer: SyncedVideoPlayer?
 
-    // Background processing queue + lock
-    private let pipelineQueue = DispatchQueue(label: "com.stereoplayer.pipeline", qos: .userInitiated)
-    private let resultLock = NSLock()
-
-    /// Sync video to audio clock — throttle decode to real-time frame rate.
-    private var lastFrameDecodeTime: Double = 0
-    private var framesSkipped = 0
-
-    /// Latest processed frame result.
+    /// Latest processed stereo frame (depth+warp result). Mounted on CVDisplayLink thread.
     private struct ProcessedFrame {
         let videoTexture: MTLTexture
         let depthTexture: MTLTexture
@@ -35,30 +25,17 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         let timing: FrameTiming
     }
 
-    private var processedFrame: ProcessedFrame? {
-        get { resultLock.lock(); defer { resultLock.unlock() }; return _processedFrame }
-        set { resultLock.lock(); _processedFrame = newValue; resultLock.unlock() }
-    }
-    private var _processedFrame: ProcessedFrame?
-
-    /// Whether background pipeline is currently running.
-    private var isPipelineRunning: Bool {
-        get { resultLock.lock(); defer { resultLock.unlock() }; return _isPipelineRunning }
-        set { resultLock.lock(); _isPipelineRunning = newValue; resultLock.unlock() }
-    }
-    private var _isPipelineRunning = false
+    private var processedFrame: ProcessedFrame?
 
     // MARK: - Test Harness State
-    /// When true, pipeline renders to file instead of MTKView screen.
     private var isTestMode = false
     private var testHarnessRecorder: TestHarnessRecorder?
     private var testFrameCount = 0
     private var testSourceURL = ""
     private var testModelURL = ""
     private var testStartTime: TimeInterval = 0
-    /// FPS tracking for timing report
-        private var frameTimestamps: [TimeInterval] = []
-        private var syntheticDepthWarned = false
+    private var frameTimestamps: [TimeInterval] = []
+    private var syntheticDepthWarned = false
     var lastDepth: CVPixelBuffer?
     var fpsLabel: NSTextField?
 
@@ -137,7 +114,15 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         self.device = mtlDevice
 
         metalPipeline = MetalPipeline(device: mtlDevice)
-        ffmpegDecoder = AVFoundationDecoder()
+        syncPlayer = SyncedVideoPlayer()
+        syncPlayer?.stateChanged = { [weak self] state in
+            guard let self else { return }
+            switch state {
+            case .playing: self.isPaused = false
+            case .paused: self.isPaused = true
+            case .idle, .loading, .readyToPlay, .failed: break
+            }
+        }
         do {
             depthEstimator = try DepthEstimator()
             logDebug("DepthEstimator initialized successfully\n")
@@ -175,37 +160,57 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
     // MARK: - Video Playback
 
-    func loadVideo(at url: URL) {
-        logDebug("LOADVIDEO before loadVideo\n")
-        do {
-            try ffmpegDecoder.loadVideo(at: url)
-            logDebug("LOADVIDEO after loadVideo\n")
-            ffmpegDecoder.start()
-            logDebug("LOADVIDEO after start, hasAudio=\(ffmpegDecoder.hasAudioTrack)\n")
+    /// Counter for frame skipping.
+    private var frameCounter = 0
+    private var renderCounter = 0
+    private var renderSecond: TimeInterval = 0
+    private var lastFrameProcTime: TimeInterval = 0
 
-            // Initialize AVPlayer for audio (synced to same asset as video decoder)
-            if ffmpegDecoder.hasAudioTrack {
-                let playerItem = AVPlayerItem(url: url)
-                let player = AVPlayer(playerItem: playerItem)
-                self.audioPlayer = player
-                logDebug("LOADVIDEO AVPlayer created for audio\n")
-            }
-            // DON'T set isPaused=false yet — view may not be in window yet
-            logDebug("LOADVIDEO window=\(self.window != nil), bounds=\(bounds)\n")
-            // Defer until view is installed in window and resized
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-                guard let self = self, self.window != nil, self.bounds.size.width > 0 else {
-                    logDebug("LOADVIDEO deferred SKIP: window=\(self?.window != nil), bounds=\(self?.bounds ?? .zero)\n")
-                    return
-                }
-                self.isPaused = false
-                self.needsDisplay = true
-                logDebug("LOADVIDEO deferred isPaused=false, needsDisplay=true, window=true, bounds=\(self.bounds)\n")
-            }
-        } catch {
-            logDebug("LOADVIDEO ERROR: \(error.localizedDescription)\n")
-            fatalError("Failed to load video: \(error)")
+    func loadVideo(at url: URL, startPlayback: Bool = true) {
+        logDebug("LOADVIDEO loading \(url.lastPathComponent)\n")
+
+        syncPlayer?.frameProcessor = { [weak self] buffer, time in
+            guard let self = self else { return buffer }
+            let processStart = CACurrentMediaTime()
+            self.processFrameSync(buffer, time: time)
+            let elapsed = (CACurrentMediaTime() - processStart) * 1000
+            logDebug("FRAMEPROC t=\(String(format: "%.2f", time.seconds)) elapsed=\(String(format: "%.1f", elapsed))ms\n")
+            return buffer
         }
+
+        syncPlayer?.frameRenderer = { [weak self] _buffer, _time in
+            guard let self = self else { return }
+            self.renderCounter += 1
+            let now = CACurrentMediaTime()
+            if Int(now) != Int(self.renderSecond) {
+                logDebug("RENDER \(Int(self.renderSecond))-\(Int(now)): \(self.renderCounter) frames\n")
+                self.renderCounter = 0
+                self.renderSecond = TimeInterval(Int(now))
+            }
+            guard let frame = self.processedFrame, let drawable = self.currentDrawable else { return }
+            let cmdBuffer = self.metalPipeline.commandQueue.makeCommandBuffer()!
+
+            if self.isTestMode {
+                self.renderTestFrame(frame, cmdBuffer: cmdBuffer)
+            } else {
+                let descriptor = self.currentRenderPassDescriptor
+                descriptor?.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
+                if let renderPipelineState = self.createRenderPipeline(), let desc = descriptor {
+                    let renderEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)!
+                    renderEncoder.setRenderPipelineState(renderPipelineState)
+                    renderEncoder.setFragmentTexture(frame.leftEye, index: 0)
+                    renderEncoder.setFragmentTexture(frame.rightEye, index: 1)
+                    renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+                    renderEncoder.endEncoding()
+                }
+                cmdBuffer.present(drawable)
+                cmdBuffer.commit()
+                self.metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
+            }
+            self.stereoComposer.releaseTextures()
+        }
+
+        syncPlayer?.load(url: url, autoplay: startPlayback)
     }
 
     func loadVideoForTest(
@@ -218,68 +223,39 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     }
 
     func start() {
-        logDebug("START called, decoder=\(ffmpegDecoder != nil), paused=\(isPaused)\n")
-        guard ffmpegDecoder != nil else { return }
-        ffmpegDecoder.start()
-        audioPlayer?.play()
-        lastFrameDecodeTime = audioPlayer?.currentTime().seconds ?? 0
-        framesSkipped = 0
-        isPaused = false
-        logDebug("START done, paused=\(isPaused)\n")
+        syncPlayer?.play()
+    }
+
+    func pause() {
+        syncPlayer?.pause()
     }
 
     func stop() {
         if isTestMode {
             stopTestHarness(
-                videoWidth: ffmpegDecoder.videoWidth,
-                videoHeight: ffmpegDecoder.videoHeight,
-                videoFPS: Double(ffmpegDecoder.frameRate),
-                videoDuration: Double(ffmpegDecoder.duration)
+                videoWidth: Int(syncPlayer?.duration.seconds ?? 0),
+                videoHeight: 1080,
+                videoFPS: 30,
+                videoDuration: syncPlayer?.duration.seconds ?? 0
             )
         }
-        audioPlayer?.pause()
-        ffmpegDecoder.stop()
+        syncPlayer?.pause()
+        syncPlayer = nil
+        processedFrame = nil
         isPaused = true
     }
-    
+
     // MARK: - NSView lifecycle
 
     override func viewWillMove(toWindow newWindow: NSWindow?) {
         super.viewWillMove(toWindow: newWindow)
         if newWindow == nil {
-            removeDisplayLink()
+            stop()
         }
     }
-    
+
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        logDebug("VIEWWINDOW window=\(window != nil), bounds=\(bounds)\n")
-        if window != nil {
-            setupDisplayLink()
-        }
-    }
-    
-    /// Manually drive the render loop with a Timer.
-    /// Higher frequency ensures responsive transitions; heavy work runs on background queue.
-    private func setupDisplayLink() {
-        guard window != nil else { return }
-        removeDisplayLink()
-        renderTimer = Timer.scheduledTimer(withTimeInterval: 1/60.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            self.draw(in: self)
-        }
-        logDebug("DISPLAYLINK added\n")
-    }
-    
-    private func removeDisplayLink() {
-        renderTimer?.invalidate()
-        renderTimer = nil
-    }
-    
-    @objc private func renderLoop() {
-        if isPaused == false {
-            draw(in: self)
-        }
     }
     
     override func layout() {
@@ -287,30 +263,15 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         logDebug("VIEWLAYOUT bounds=\(bounds)\n")
     }
 
-    func pause() {
-        ffmpegDecoder.pause()
-        audioPlayer?.pause()
-        isPaused = true
-    }
-
     func seek(to time: TimeInterval) {
-        _ = try? ffmpegDecoder.seek(to: time)
-        audioPlayer?.seek(to: CMTime(seconds: time, preferredTimescale: 600))
+        syncPlayer?.seek(to: CMTime(seconds: time, preferredTimescale: 600))
     }
 
-    func stepFrame() {
-        guard let frame = try? ffmpegDecoder.decodeNextFrame() else { return }
-        currentFrame = frame
-    }
+    func stepFrame() {}
 
     var videoInfo: VideoInfo {
-        VideoInfo(
-            width: ffmpegDecoder.videoWidth,
-            height: ffmpegDecoder.videoHeight,
-            codec: "AVFoundation",
-            fps: ffmpegDecoder.frameRate,
-            duration: ffmpegDecoder.duration
-        )
+        let duration = syncPlayer?.duration.seconds ?? 0
+        return VideoInfo(width: 0, height: 0, codec: "AVFoundation", fps: 0, duration: duration)
     }
 
     // MARK: - Depth Preview
@@ -319,181 +280,33 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         lastDepth = depth
     }
 
-    // MARK: - MTKViewDelegate (Rendering)
+    /// no-op — rendering is driven by SyncedVideoPlayer's frameRenderer.
+    public func draw(in view: MTKView) {}
 
-    /// Atomically take and clear processedFrame to prevent double-render.
-    @inline(__always)
-    private func takeProcessedFrame() -> ProcessedFrame? {
-        resultLock.lock()
-        defer { resultLock.unlock() }
-        let f = _processedFrame
-        _processedFrame = nil
-       return f
-    }
+    // MARK: - Synchronous Frame Processing
 
-    public func draw(in view: MTKView) {
-        if !drawableSize.width.isFinite || !drawableSize.height.isFinite {
-            drawableSize = (bounds.size.width > 0 && bounds.size.height > 0) ? bounds.size : CGSize(width: 3840, height: 1080)
-        }
-
-        if !isPaused, !isPipelineRunning, ffmpegDecoder != nil {
-            // Sync video to audio clock: only decode at ~real-time frame rate
-            if let audioTime = audioPlayer?.currentTime().seconds,
-               audioTime > 0, ffmpegDecoder.frameRate > 0 {
-                let expectedVideoTime = lastFrameDecodeTime + framesSkipped / ffmpegDecoder.frameRate
-                if audioTime > expectedVideoTime + 0.2 {
-                    // Audio has jumped ahead — skip video to catch up
-                    _ = try? ffmpegDecoder.seek(to: max(0, audioTime - 0.5))
-                    lastFrameDecodeTime = audioTime
-                    framesSkipped = 0
-                    kickOffProcessing()
-                } else {
-                    // Normal pace — decode at frame rate
-                    let interval = 1.0 / ffmpegDecoder.frameRate
-                    if audioTime - lastFrameDecodeTime >= interval {
-                        lastFrameDecodeTime = audioTime
-                        framesSkipped = 0
-                        kickOffProcessing()
-                    } else {
-                        framesSkipped += 1
-                    }
-                }
-            } else {
-                // No audio — just run at normal speed
-                kickOffProcessing()
-            }
-        }
-
-        guard let frame = takeProcessedFrame(), let drawable = currentDrawable else { return }
-
-        let cmdBuffer = metalPipeline.commandQueue.makeCommandBuffer()!
-
-        if isTestMode {
-            let sbsWidth = 3840
-            let sbsHeight = 1080
-            let eyeWidth = frame.leftEye.width
-            let eyeHeight = frame.leftEye.height
-
-            let sbsTexture = metalPipeline.createTexture(
-                width: sbsWidth, height: sbsHeight,
-                pixelFormat: .bgra8Unorm
-            )
-            let blit = cmdBuffer.makeBlitCommandEncoder()!
-            blit.copy(
-                from: frame.leftEye,
-                sourceSlice: 0, sourceLevel: 0,
-                sourceOrigin: MTLOriginMake(0, 0, 0),
-                sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
-                to: sbsTexture,
-                destinationSlice: 0, destinationLevel: 0,
-                destinationOrigin: MTLOriginMake(0, 0, 0)
-            )
-            blit.copy(
-                from: frame.rightEye,
-                sourceSlice: 0, sourceLevel: 0,
-                sourceOrigin: MTLOriginMake(0, 0, 0),
-                sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
-                to: sbsTexture,
-                destinationSlice: 0, destinationLevel: 0,
-                destinationOrigin: MTLOriginMake(eyeWidth, 0, 0)
-            )
-            blit.endEncoding()
-            cmdBuffer.commit()
-            cmdBuffer.waitUntilCompleted()
-
-            guard let sbsPixelBuffer = createPixelBuffer(from: sbsTexture, width: sbsWidth, height: sbsHeight) else {
-                metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
-                stereoComposer.releaseTextures()
-                return
-            }
-
-            let recordStart = CACurrentMediaTime()
-            testFrameCount += 1
-
-            let frameEnd = CACurrentMediaTime()
-            let fps: Double
-            frameTimestamps.append(frameEnd)
-            if frameTimestamps.count > 30 {
-                frameTimestamps.removeFirst()
-                let span = frameTimestamps.last! - frameTimestamps.first!
-                fps = span > 0 ? Double(frameTimestamps.count) / span : 0
-            } else {
-                let elapsed = frameEnd - testStartTime
-                fps = elapsed > 0 ? Double(testFrameCount) / elapsed : 0
-            }
-
-            let timing = FrameTiming(
-                frame: testFrameCount,
-                timestamp: frameEnd - testStartTime,
-                decodeMs: frame.timing.decodeMs,
-                depthMs: frame.timing.depthMs,
-                warpMs: frame.timing.warpMs,
-                composeMs: frame.timing.composeMs,
-                recordMs: (CACurrentMediaTime() - recordStart) * 1000,
-                totalMs: frame.timing.totalMs,
-                fps: fps
-            )
-            testHarnessRecorder?.appendFrame(sbsPixelBuffer, timing: timing)
-            metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
-        } else {
-            let descriptor = currentRenderPassDescriptor
-            descriptor?.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
-
-            if let renderPipelineState = createRenderPipeline(), let desc = descriptor {
-                let renderEncoder = cmdBuffer.makeRenderCommandEncoder(descriptor: desc)!
-                renderEncoder.setRenderPipelineState(renderPipelineState)
-                renderEncoder.setFragmentTexture(frame.leftEye, index: 0)
-                renderEncoder.setFragmentTexture(frame.rightEye, index: 1)
-                renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-                renderEncoder.endEncoding()
-            }
-
-            cmdBuffer.present(drawable)
-            cmdBuffer.commit()
-            metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
-        }
-        stereoComposer.releaseTextures()
-    }
-
-    private func kickOffProcessing() {
-        guard !isPipelineRunning else { return }
-        isPipelineRunning = true
-
-        pipelineQueue.async { [weak self] in
-            self?.processFrame()
-        }
-    }
-
-    private func processFrame() {
-        defer { isPipelineRunning = false }
-
-        guard let videoFrame = ffmpegDecoder.decodeFrame() else { return }
-        currentFrame = videoFrame
-
-        // If source video is portrait (aspect ratio < 1), pad to square
-        // so stereo warp has content on all sides and won't sample from
-        // edge black bars.
-        let vw = CVPixelBufferGetWidth(videoFrame)
-        let vh = CVPixelBufferGetHeight(videoFrame)
-        let frame = vw >= vh ? videoFrame : padToSquare(videoFrame)
+    /// Runs depth+warp synchronously on the CVDisplayLink thread.
+    private func processFrameSync(_ videoFrame: CVPixelBuffer, time: CMTime) {
+        let portraidFrame = CVPixelBufferGetWidth(videoFrame) >= CVPixelBufferGetHeight(videoFrame)
+            ? videoFrame : padToSquare(videoFrame)
 
         let frameStart = CACurrentMediaTime()
 
         let depthStart = CACurrentMediaTime()
         let depthMap: CVPixelBuffer
         if let depthEst = depthEstimator {
-            depthMap = depthEst.estimateDepth(from: frame)
+            depthMap = depthEst.estimateDepth(from: portraidFrame)
         } else {
             depthMap = DepthEstimator.generateDepthMap(
-                width: CVPixelBufferGetWidth(frame),
-                height: CVPixelBufferGetHeight(frame),
+                width: CVPixelBufferGetWidth(portraidFrame),
+                height: CVPixelBufferGetHeight(portraidFrame),
                 focalLength: 50.0
             )
         }
         let depthMs = (CACurrentMediaTime() - depthStart) * 1000
 
         let textures = metalPipeline.packageAll(
-            videoFrame: frame,
+            videoFrame: portraidFrame,
             depthMap: depthMap
         )
 
@@ -506,8 +319,10 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
         let totalMs = (CACurrentMediaTime() - frameStart) * 1000
 
+        logDebug("FRAMEPROC depth=\(String(format: "%.1f", depthMs))ms warp=\(String(format: "%.1f", warpMs))ms total=\(String(format: "%.1f", totalMs))ms\n")
+
         let timing = FrameTiming(
-            frame: Int(totalMs / 1000 * 60),
+            frame: 0,
             timestamp: CACurrentMediaTime(),
             decodeMs: 0,
             depthMs: depthMs,
@@ -518,19 +333,84 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
             fps: totalMs > 0 ? 1000 / totalMs : 0
         )
 
-        resultLock.lock()
-        _processedFrame = ProcessedFrame(
+        processedFrame = ProcessedFrame(
             videoTexture: textures.video,
             depthTexture: textures.depth,
             leftEye: leftEye,
             rightEye: rightEye,
             timing: timing
         )
-        resultLock.unlock()
+    }
 
-        DispatchQueue.main.async { [weak self] in
-            self?.needsDisplay = true
+    /// Render test frame to file.
+    private func renderTestFrame(_ frame: ProcessedFrame, cmdBuffer: MTLCommandBuffer) {
+        let sbsWidth = 3840
+        let sbsHeight = 1080
+        let eyeWidth = frame.leftEye.width
+        let eyeHeight = frame.leftEye.height
+
+        let sbsTexture = metalPipeline.createTexture(
+            width: sbsWidth, height: sbsHeight,
+            pixelFormat: .bgra8Unorm
+        )
+        let blit = cmdBuffer.makeBlitCommandEncoder()!
+        blit.copy(
+            from: frame.leftEye,
+            sourceSlice: 0, sourceLevel: 0,
+            sourceOrigin: MTLOriginMake(0, 0, 0),
+            sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
+            to: sbsTexture,
+            destinationSlice: 0, destinationLevel: 0,
+            destinationOrigin: MTLOriginMake(0, 0, 0)
+        )
+        blit.copy(
+            from: frame.rightEye,
+            sourceSlice: 0, sourceLevel: 0,
+            sourceOrigin: MTLOriginMake(0, 0, 0),
+            sourceSize: MTLSizeMake(eyeWidth, eyeHeight, 1),
+            to: sbsTexture,
+            destinationSlice: 0, destinationLevel: 0,
+            destinationOrigin: MTLOriginMake(eyeWidth, 0, 0)
+        )
+        blit.endEncoding()
+        cmdBuffer.commit()
+        cmdBuffer.waitUntilCompleted()
+
+        guard let sbsPixelBuffer = createPixelBuffer(from: sbsTexture, width: sbsWidth, height: sbsHeight) else {
+            metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
+            stereoComposer.releaseTextures()
+            return
         }
+
+        let recordStart = CACurrentMediaTime()
+        testFrameCount += 1
+
+        let frameEnd = CACurrentMediaTime()
+        let fps: Double
+        frameTimestamps.append(frameEnd)
+        if frameTimestamps.count > 30 {
+            frameTimestamps.removeFirst()
+            let span = frameTimestamps.last! - frameTimestamps.first!
+            fps = span > 0 ? Double(frameTimestamps.count) / span : 0
+        } else {
+            let elapsed = frameEnd - testStartTime
+            fps = elapsed > 0 ? Double(testFrameCount) / elapsed : 0
+        }
+
+        let timing = FrameTiming(
+            frame: testFrameCount,
+            timestamp: frameEnd - testStartTime,
+            decodeMs: frame.timing.decodeMs,
+            depthMs: frame.timing.depthMs,
+            warpMs: frame.timing.warpMs,
+            composeMs: frame.timing.composeMs,
+            recordMs: (CACurrentMediaTime() - recordStart) * 1000,
+            totalMs: frame.timing.totalMs,
+            fps: fps
+        )
+        testHarnessRecorder?.appendFrame(sbsPixelBuffer, timing: timing)
+        metalPipeline.releaseTextures([frame.videoTexture, frame.depthTexture])
+        metalPipeline.releaseTextures([sbsTexture])
     }
 
     /// Copy MTLTexture → CVPixelBuffer (BGRA) for AVAssetWriter consumption.

@@ -5,22 +5,24 @@ import MetalKit
 
 struct MainWindowView: View {
     @EnvironmentObject var appDelegate: AppDelegate
-    @State private var isPlaying = false
+    @ObservedObject var appState: AppState
+    @State private var isPlaying: Bool = false
+
+    init(appState: AppState) {
+        self.appState = appState
+        _isPlaying = State(initialValue: appState.isPlaying)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             // Metal rendering view
             MetalRenderer()
                 .background(Color.black)
-                .onChange(of: appDelegate.appState.isPlaying) { newVal in
-                    isPlaying = newVal
-                }
 
             // Playback controls bar
             HStack {
                 Button(action: {
                     appDelegate.togglePlayback()
-                    isPlaying.toggle()
                 }) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                         .font(.title3)
@@ -43,6 +45,7 @@ struct MainWindowView: View {
             .padding(.vertical, 8)
             .background(Color.black.opacity(0.8))
         }
+        .onReceive(appState.$isPlaying) { isPlaying = $0 }
         .onAppear {
             logDebug("MAINWINDOW onAppear fire\n")
             appDelegate.startRayNeoDisplayMonitoring()

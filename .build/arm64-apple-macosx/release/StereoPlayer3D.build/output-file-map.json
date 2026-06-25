@@ -10,18 +10,6 @@
     "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoPlayer3DApp.swiftdeps",
     "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoPlayer3DApp.dia"
   },
-  "/Users/doug/Code/StereoPlayer3D/Sources/Core/AVFoundationDecoder.swift": {
-    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swift.o",
-    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder~partial.swiftmodule",
-    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.swiftdeps",
-    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AVFoundationDecoder.dia"
-  },
-  "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift": {
-    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o",
-    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer~partial.swiftmodule",
-    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swiftdeps",
-    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.dia"
-  },
   "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift": {
     "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o",
     "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger~partial.swiftmodule",
@@ -46,35 +34,23 @@
     "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swiftdeps",
     "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.dia"
   },
+  "/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift": {
+    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.swift.o",
+    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer~partial.swiftmodule",
+    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.swiftdeps",
+    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/SyncedVideoPlayer.dia"
+  },
   "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift": {
     "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o",
     "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder~partial.swiftmodule",
     "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swiftdeps",
     "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.dia"
   },
-  "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift": {
-    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swift.o",
-    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame~partial.swiftmodule",
-    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swiftdeps",
-    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.dia"
-  },
-  "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoPlayer.swift": {
-    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.swift.o",
-    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer~partial.swiftmodule",
-    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.swiftdeps",
-    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoPlayer.dia"
-  },
   "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalPipeline.swift": {
     "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.swift.o",
     "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline~partial.swiftmodule",
     "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.swiftdeps",
     "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalPipeline.dia"
-  },
-  "/Users/doug/Code/StereoPlayer3D/Sources/Metal/MetalReadbacks.swift": {
-    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.swift.o",
-    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks~partial.swiftmodule",
-    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.swiftdeps",
-    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalReadbacks.dia"
   },
   "/Users/doug/Code/StereoPlayer3D/Sources/Views/MainWindowView.swift": {
     "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MainWindowView.swift.o",

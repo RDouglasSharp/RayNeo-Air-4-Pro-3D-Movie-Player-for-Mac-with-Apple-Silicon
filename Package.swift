@@ -26,7 +26,7 @@ let package = Package(
             ],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency=complete"),
-                .define("STEREO_AUTOPLAY"),
+                .define("STEREO_AUTOPLAY", .when(configuration: .debug)),
             ],
         ),
 
