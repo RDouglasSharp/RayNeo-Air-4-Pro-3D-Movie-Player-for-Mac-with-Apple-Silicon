@@ -15,6 +15,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     private var depthEstimator: DepthEstimator?
     private var stereoComposer: StereoComposer!
     private var ffmpegDecoder: AVFoundationDecoder!
+    private var audioPlayer: AVPlayer?
     private var renderTimer: Timer?
 
     // Background processing queue + lock
@@ -176,7 +177,15 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
             try ffmpegDecoder.loadVideo(at: url)
             logDebug("LOADVIDEO after loadVideo\n")
             ffmpegDecoder.start()
-            logDebug("LOADVIDEO after start\n")
+            logDebug("LOADVIDEO after start, hasAudio=\(ffmpegDecoder.hasAudioTrack)\n")
+
+            // Initialize AVPlayer for audio (synced to same asset as video decoder)
+            if ffmpegDecoder.hasAudioTrack {
+                let playerItem = AVPlayerItem(url: url)
+                let player = AVPlayer(playerItem: playerItem)
+                self.audioPlayer = player
+                logDebug("LOADVIDEO AVPlayer created for audio\n")
+            }
             // DON'T set isPaused=false yet — view may not be in window yet
             logDebug("LOADVIDEO window=\(self.window != nil), bounds=\(bounds)\n")
             // Defer until view is installed in window and resized
@@ -208,6 +217,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         logDebug("START called, decoder=\(ffmpegDecoder != nil), paused=\(isPaused)\n")
         guard ffmpegDecoder != nil else { return }
         ffmpegDecoder.start()
+        audioPlayer?.play()
         isPaused = false
         logDebug("START done, paused=\(isPaused)\n")
     }
@@ -221,6 +231,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
                 videoDuration: Double(ffmpegDecoder.duration)
             )
         }
+        audioPlayer?.pause()
         ffmpegDecoder.stop()
         isPaused = true
     }
@@ -272,11 +283,13 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
     func pause() {
         ffmpegDecoder.pause()
+        audioPlayer?.pause()
         isPaused = true
     }
 
     func seek(to time: TimeInterval) {
         _ = try? ffmpegDecoder.seek(to: time)
+        audioPlayer?.seek(to: CMTime(seconds: time, preferredTimescale: 600))
     }
 
     func stepFrame() {
@@ -427,23 +440,30 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         guard let videoFrame = ffmpegDecoder.decodeFrame() else { return }
         currentFrame = videoFrame
 
+        // If source video is portrait (aspect ratio < 1), pad to square
+        // so stereo warp has content on all sides and won't sample from
+        // edge black bars.
+        let vw = CVPixelBufferGetWidth(videoFrame)
+        let vh = CVPixelBufferGetHeight(videoFrame)
+        let frame = vw >= vh ? videoFrame : padToSquare(videoFrame)
+
         let frameStart = CACurrentMediaTime()
 
         let depthStart = CACurrentMediaTime()
         let depthMap: CVPixelBuffer
         if let depthEst = depthEstimator {
-            depthMap = depthEst.estimateDepth(from: videoFrame)
+            depthMap = depthEst.estimateDepth(from: frame)
         } else {
             depthMap = DepthEstimator.generateDepthMap(
-                width: CVPixelBufferGetWidth(videoFrame),
-                height: CVPixelBufferGetHeight(videoFrame),
+                width: CVPixelBufferGetWidth(frame),
+                height: CVPixelBufferGetHeight(frame),
                 focalLength: 50.0
             )
         }
         let depthMs = (CACurrentMediaTime() - depthStart) * 1000
 
         let textures = metalPipeline.packageAll(
-            videoFrame: videoFrame,
+            videoFrame: frame,
             depthMap: depthMap
         )
 
@@ -513,6 +533,52 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
             mipmapLevel: 0
         )
 
+        return buf
+    }
+
+    /// If source frame is portrait (height > width), pad horizontally to square
+    /// so the stereo warp doesn't sample from black edges.
+    /// Returns a new CVPixelBuffer (square, black-padded). No-op if already landscape.
+    private func padToSquare(_ source: CVPixelBuffer) -> CVPixelBuffer {
+        let sw = CVPixelBufferGetWidth(source)
+        let sh = CVPixelBufferGetHeight(source)
+        guard sh > sw else { return source }
+
+        let size = Int(sh)
+        var padded: CVPixelBuffer?
+        let attrs: [String: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
+        ]
+        CVPixelBufferCreate(kCFAllocatorDefault, size, size, kCVPixelFormatType_32BGRA, attrs as CFDictionary, &padded)
+        guard let buf = padded else { return source }
+
+        // Create Metal textures
+        let srcTex = metalPipeline.createTexture(fromPixelBuffer: source, pixelFormat: .bgra8Unorm)
+        let dstTex = metalPipeline.createTexture(width: size, height: size, pixelFormat: .bgra8Unorm)
+
+        let cmd = metalPipeline.commandQueue.makeCommandBuffer()!
+        let blit = cmd.makeBlitCommandEncoder()!
+
+        let padX = (size - sw) / 2
+        blit.copy(
+            from: srcTex,
+            sourceSlice: 0, sourceLevel: 0,
+            sourceOrigin: MTLOriginMake(0, 0, 0),
+            sourceSize: MTLSizeMake(sw, sh, 1),
+            to: dstTex,
+            destinationSlice: 0, destinationLevel: 0,
+            destinationOrigin: MTLOriginMake(padX, 0, 0)
+        )
+        blit.endEncoding()
+        cmd.commit()
+
+        // Copy dst texture → destination CVPixelBuffer
+        guard let data = CVPixelBufferGetBaseAddress(buf) else { return source }
+        let bpr = CVPixelBufferGetBytesPerRow(buf)
+        dstTex.getBytes(data, bytesPerRow: bpr, from: MTLRegionMake2D(0, 0, size, size), mipmapLevel: 0)
+
+        metalPipeline.releaseTextures([srcTex, dstTex])
         return buf
     }
 

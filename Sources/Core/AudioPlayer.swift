@@ -1,30 +1,65 @@
 import AVFoundation
 import Foundation
+import os.log
 
-/// Minimal audio player wrapping AVAudioEngine + AVAudioPlayerNode.
-/// Step 1: Idle engine only — no scheduling, no integration.
+/// Audio player wrapping AVAudioEngine + AVAudioPlayerNode.
 final class AudioPlayer {
-    private var engine: AVAudioEngine?
-    private var playerNode: AVAudioPlayerNode?
+    private let engine: AVAudioEngine
+    private let playerNode: AVAudioPlayerNode
+    private let logger = Logger(subsystem: "com.stereoplayer", category: "AudioPlayer")
 
-    /// Audio sample rate from source (set after loading).
-    private(set) var sampleRate: Double = 0
+    /// Audio format (set after loading).
+    private(set) var format: AVAudioFormat?
 
     init() {
-        setupEngine()
-    }
-
-    private func setupEngine() {
-        let engine = AVAudioEngine()
-        let playerNode = AVAudioPlayerNode()
+        self.engine = AVAudioEngine()
+        self.playerNode = AVAudioPlayerNode()
         engine.attach(playerNode)
-        // Do NOT connect or start — just idle for now
-        self.engine = engine
-        self.playerNode = playerNode
+        engine.connect(playerNode, to: engine.mainMixerNode, format: nil)
     }
 
+    /// Configure with sample rate and channels for optimal buffer creation.
+    func configure(sampleRate: Double, channels: Int) {
+        format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: sampleRate,
+            channels: AVAudioChannelCount(channels),
+            interleaved: false
+        )
+    }
+
+    /// Start audio engine and player node.
+    func start() {
+        engine.prepare()
+        do {
+            try engine.start()
+        } catch {
+            logger.error("Engine start failed: \(error)")
+        }
+        playerNode.play()
+    }
+
+    /// Schedule a PCM buffer for playback.
+    func scheduleBuffer(_ buffer: AVAudioPCMBuffer) {
+        playerNode.scheduleBuffer(buffer) { [weak self] in
+            // Buffer callback — AutoReleasedBlock, must not capture strongly
+        }
+    }
+
+    /// Stop playback.
     func stop() {
-        playerNode?.stop()
-        engine?.stop()
+        playerNode.stop()
+        engine.stop()
+        engine.reset()
+    }
+
+    /// Pause playback.
+    func pause() {
+        playerNode.pause()
+    }
+
+    /// Check if playing.
+    var isPlaying: Bool {
+        playerNode.isPlaying
     }
 }

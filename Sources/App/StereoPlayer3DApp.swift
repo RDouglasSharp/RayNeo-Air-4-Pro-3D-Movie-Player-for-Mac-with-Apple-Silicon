@@ -16,9 +16,6 @@ struct StereoPlayer3DApp: App {
                 .environmentObject(appDelegate)
                 .environmentObject(appDelegate.appState)
                 .frame(minWidth: 320, minHeight: 180)
-                .onExitCommand {
-                    NSApplication.shared.terminate(nil)
-                }
         }
         .commands {
             CommandGroup(replacing: .newItem) {}

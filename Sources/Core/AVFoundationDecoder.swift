@@ -1,5 +1,6 @@
 import AVFoundation
 import CoreVideo
+import CoreMedia
 
 /// AVFoundation-based video decoder using AVAssetReader + AVAssetReaderTrackOutput.
 ///
@@ -22,10 +23,14 @@ public class AVFoundationDecoder: VideoDecoderProtocol {
     public private(set) var videoHeight = 0
     public private(set) var frameRate: Double = 30.0
     public private(set) var duration: Double = 0
+    public private(set) var audioSampleRate: Double = 0
+    public private(set) var audioChannels: Int = 0
 
     private var _currentFrame: CVPixelBuffer?
     private var url: URL?
     private var doneScan: Bool = false
+    private(set) var hasAudioTrack: Bool = false
+    private var audioTrackOutput: AVAssetReaderTrackOutput?
 
     public init() {}
 
@@ -70,6 +75,34 @@ public class AVFoundationDecoder: VideoDecoderProtocol {
             assetReader?.add(videoTrackOutput!)
         }
 
+        // Add audio track output if available
+        if let audioTrack = asset.tracks(withMediaType: .audio).first {
+            hasAudioTrack = true
+            if let asbdPtr = CMAudioFormatDescriptionGetStreamBasicDescription(audioTrack.formatDescriptions.first as! CMFormatDescription) {
+                let asbd = asbdPtr.pointee
+                audioSampleRate = asbd.mSampleRate
+                audioChannels = Int(asbd.mChannelsPerFrame)
+            } else {
+                logDebug("AUDIO: CMAudioFormatDescriptionGetStreamBasicDescription returned nil\n")
+                audioSampleRate = 48000
+                audioChannels = 2
+            }
+            // Verify by reading from audio output after setup
+            logDebug("AUDIO read: sampleRate=\(audioSampleRate) channels=\(audioChannels)\n")
+
+            let audioSettings: [String: Any] = [
+                AVFormatIDKey as String: kAudioFormatLinearPCM,
+                AVLinearPCMBitDepthKey as String: 32,
+                AVLinearPCMIsFloatKey as String: true,
+            ]
+            audioTrackOutput = AVAssetReaderTrackOutput(track: audioTrack, outputSettings: audioSettings)
+            if assetReader?.canAdd(audioTrackOutput!) ?? false {
+                assetReader?.add(audioTrackOutput!)
+            }
+            logDebug("AUDIO: track found — rate=\(audioSampleRate)Hz, channels=\(audioChannels)\n")
+        } else {
+            hasAudioTrack = false
+        }
         assetReader?.startReading()
     }
 
@@ -171,6 +204,22 @@ public class AVFoundationDecoder: VideoDecoderProtocol {
         if let vto = videoTrackOutput, assetReader?.canAdd(vto) ?? false {
             assetReader?.add(vto)
         }
+
+        if let audioTrack = asset.tracks(withMediaType: .audio).first {
+            let audioOutput = AVAssetReaderTrackOutput(
+                track: audioTrack,
+                outputSettings: [
+                    AVFormatIDKey as String: kAudioFormatLinearPCM,
+                    AVLinearPCMBitDepthKey as String: 32,
+                    AVLinearPCMIsFloatKey as String: true,
+                ]
+            )
+            audioTrackOutput = audioOutput
+            if assetReader?.canAdd(audioTrackOutput!) ?? false {
+                assetReader?.add(audioTrackOutput!)
+            }
+        }
+
         assetReader?.startReading()
     }
 
