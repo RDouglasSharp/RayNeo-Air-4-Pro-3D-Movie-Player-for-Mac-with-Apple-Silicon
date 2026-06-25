@@ -148,6 +148,7 @@ final class AppState: ObservableObject {
 final class AppDelegate: NSObject, ObservableObject {
     @Published var appState = AppState()
     var metalRenderer: MetalRendererView?
+    var rayNeoMonitor: RayNeoDisplayMonitor?
     
     #if STEREO_AUTOPLAY
     static let autoPlayURL = URL(fileURLWithPath: "/Users/doug/Movies/GracieAbramsThatsSoTrueLiveAtRadioCityMusicHall.mp4")
@@ -243,6 +244,23 @@ final class AppDelegate: NSObject, ObservableObject {
     func seekToPosition() {
         guard let renderer = metalRenderer else { return }
         renderer.seek(to: appState.playbackPosition)
+    }
+
+    /// Start monitoring for RayNeo Air 4 Pro display.
+    func startRayNeoDisplayMonitoring() {
+        let monitor = RayNeoDisplayMonitor()
+        monitor.didFindDisplay = { [weak self] screen in
+            logDebug("RAYNEO: display found — moving window\n")
+            guard let window = NSApplication.shared.mainWindow else { return }
+            monitor.moveWindowToScreen(window, screen: screen)
+        }
+        monitor.didLosingDisplay = { _ in
+            logDebug("RAYNEO: display lost — returning to main screen\n")
+            guard let window = NSApplication.shared.mainWindow else { return }
+            monitor.moveWindowToMainScreen(window)
+        }
+        monitor.startPolling()
+        self.rayNeoMonitor = monitor
     }
 }
 

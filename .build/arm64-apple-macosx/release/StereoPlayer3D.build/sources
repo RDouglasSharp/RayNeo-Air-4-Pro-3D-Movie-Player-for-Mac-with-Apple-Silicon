@@ -3,6 +3,7 @@
 /Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift
+/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift
 /Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift

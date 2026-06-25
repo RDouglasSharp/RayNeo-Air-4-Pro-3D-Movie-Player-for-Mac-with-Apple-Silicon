@@ -22,6 +22,10 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     private let pipelineQueue = DispatchQueue(label: "com.stereoplayer.pipeline", qos: .userInitiated)
     private let resultLock = NSLock()
 
+    /// Sync video to audio clock — throttle decode to real-time frame rate.
+    private var lastFrameDecodeTime: Double = 0
+    private var framesSkipped = 0
+
     /// Latest processed frame result.
     private struct ProcessedFrame {
         let videoTexture: MTLTexture
@@ -218,6 +222,8 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         guard ffmpegDecoder != nil else { return }
         ffmpegDecoder.start()
         audioPlayer?.play()
+        lastFrameDecodeTime = audioPlayer?.currentTime().seconds ?? 0
+        framesSkipped = 0
         isPaused = false
         logDebug("START done, paused=\(isPaused)\n")
     }
@@ -331,7 +337,31 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
         }
 
         if !isPaused, !isPipelineRunning, ffmpegDecoder != nil {
-            kickOffProcessing()
+            // Sync video to audio clock: only decode at ~real-time frame rate
+            if let audioTime = audioPlayer?.currentTime().seconds,
+               audioTime > 0, ffmpegDecoder.frameRate > 0 {
+                let expectedVideoTime = lastFrameDecodeTime + framesSkipped / ffmpegDecoder.frameRate
+                if audioTime > expectedVideoTime + 0.2 {
+                    // Audio has jumped ahead — skip video to catch up
+                    _ = try? ffmpegDecoder.seek(to: max(0, audioTime - 0.5))
+                    lastFrameDecodeTime = audioTime
+                    framesSkipped = 0
+                    kickOffProcessing()
+                } else {
+                    // Normal pace — decode at frame rate
+                    let interval = 1.0 / ffmpegDecoder.frameRate
+                    if audioTime - lastFrameDecodeTime >= interval {
+                        lastFrameDecodeTime = audioTime
+                        framesSkipped = 0
+                        kickOffProcessing()
+                    } else {
+                        framesSkipped += 1
+                    }
+                }
+            } else {
+                // No audio — just run at normal speed
+                kickOffProcessing()
+            }
         }
 
         guard let frame = takeProcessedFrame(), let drawable = currentDrawable else { return }

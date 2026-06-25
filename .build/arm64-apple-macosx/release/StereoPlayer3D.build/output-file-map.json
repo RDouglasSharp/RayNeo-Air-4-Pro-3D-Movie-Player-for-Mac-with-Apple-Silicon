@@ -34,6 +34,12 @@
     "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swiftdeps",
     "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.dia"
   },
+  "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift": {
+    "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swift.o",
+    "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor~partial.swiftmodule",
+    "swift-dependencies": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swiftdeps",
+    "diagnostics": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.dia"
+  },
   "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift": {
     "object": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o",
     "swiftmodule": "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer~partial.swiftmodule",

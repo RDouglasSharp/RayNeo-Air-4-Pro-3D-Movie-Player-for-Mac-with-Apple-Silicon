@@ -103,6 +103,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift"
         },
         {
@@ -163,6 +167,7 @@
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/AudioPlayer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DebugLogger.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/DepthEstimator.swift.o",
+        "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/TestHarnessRecorder.swift.o",
         "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/VideoFrame.swift.o",
@@ -241,6 +246,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o"
         },
         {
@@ -291,6 +300,7 @@
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
+        "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
         "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift",
@@ -507,6 +517,7 @@
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/AudioPlayer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DebugLogger.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/DepthEstimator.swift",
+      "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/TestHarnessRecorder.swift",
       "/Users/doug/Code/StereoPlayer3D/Sources/Core/VideoFrame.swift",
@@ -733,6 +744,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/RayNeoDisplayMonitor.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/Sources/Core/StereoComposer.swift"
         },
         {
@@ -819,6 +834,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/StereoComposer.swift.o"
         },
         {
@@ -900,6 +919,10 @@
         {
           "kind" : "file",
           "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/MetalView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/doug/Code/StereoPlayer3D/.build/arm64-apple-macosx/release/StereoPlayer3D.build/RayNeoDisplayMonitor.swift.o"
         },
         {
           "kind" : "file",

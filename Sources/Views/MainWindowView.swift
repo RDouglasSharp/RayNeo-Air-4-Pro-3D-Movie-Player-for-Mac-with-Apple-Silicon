@@ -45,6 +45,7 @@ struct MainWindowView: View {
         }
         .onAppear {
             logDebug("MAINWINDOW onAppear fire\n")
+            appDelegate.startRayNeoDisplayMonitoring()
             #if STEREO_AUTOPLAY
             logDebug("MAINWINDOW calling loadVideoAndAutoPlay: \(AppDelegate.autoPlayURL.path)\n")
             appDelegate.loadVideoAndAutoPlay(at: AppDelegate.autoPlayURL)
