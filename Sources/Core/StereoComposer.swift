@@ -88,6 +88,41 @@ public class StereoComposer {
 
         logDebug("COMPOSE warp shader OK\n")
 
+        // Edge-aware depth smoothing pass: run bilateralFilterDepth on the raw depth texture
+        // BEFORE the stereo warp samples it. This is what removes the noisy-edge artifacts
+        // around object silhouettes (e.g. arms, instrument necks) that show up as torn/
+        // smeared pixels in the warped output — see StereoWarp.metal for the full rationale.
+        // Falls back to the raw (unsmoothed) depth texture if the shader function is missing
+        // for any reason, so a partial bundle/library issue degrades quality rather than
+        // breaking playback entirely.
+        var smoothedDepth = depth
+        if let bilateralFunc = library.makeFunction(name: "bilateralFilterDepth"),
+           let bilateralPipeline = try? pipeline.device.makeComputePipelineState(function: bilateralFunc) {
+            let filteredDepth = pipeline.createTexture(
+                width: depth.width,
+                height: depth.height,
+                pixelFormat: depth.pixelFormat
+            )
+            if let bilateralEncoder = commandBuffer.makeComputeCommandEncoder() {
+                bilateralEncoder.setComputePipelineState(bilateralPipeline)
+                bilateralEncoder.setTexture(depth, index: 0)
+                bilateralEncoder.setTexture(filteredDepth, index: 1)
+                let depthThreadgroups = MTLSize(
+                    width: (depth.width + 7) / 8,
+                    height: (depth.height + 7) / 8,
+                    depth: 1
+                )
+                let depthThreadGroupSize = MTLSize(width: 8, height: 8, depth: 1)
+                bilateralEncoder.dispatchThreadgroups(depthThreadgroups, threadsPerThreadgroup: depthThreadGroupSize)
+                bilateralEncoder.endEncoding()
+                smoothedDepth = filteredDepth
+            } else {
+                logDebug("COMPOSE bilateral encoder creation failed — using raw depth\n")
+            }
+        } else {
+            logDebug("COMPOSE bilateralFilterDepth function not found — using raw depth\n")
+        }
+
         guard let encoder = commandBuffer.makeComputeCommandEncoder() else {
             self.leftTexture = leftEye
             self.rightTexture = rightEye
@@ -96,7 +131,7 @@ public class StereoComposer {
 
         encoder.setComputePipelineState(computePipeline)
         encoder.setTexture(video, index: 0)
-        encoder.setTexture(depth, index: 1)
+        encoder.setTexture(smoothedDepth, index: 1)
         encoder.setTexture(leftEye, index: 2)
         encoder.setTexture(rightEye, index: 3)
 
@@ -128,7 +163,7 @@ public class StereoComposer {
            let fillEncoder = commandBuffer.makeComputeCommandEncoder() {
             fillEncoder.setComputePipelineState(fillPipeline)
             fillEncoder.setTexture(leftEye, index: 0)
-            fillEncoder.setTexture(depth, index: 1)
+            fillEncoder.setTexture(smoothedDepth, index: 1)
             params.withUnsafeBytes { ptr in
                 fillEncoder.setBytes(ptr.baseAddress!, length: MemoryLayout<Float>.stride * 11, index: 4)
             }
@@ -141,7 +176,7 @@ public class StereoComposer {
            let fillEncoderR = commandBuffer.makeComputeCommandEncoder() {
             fillEncoderR.setComputePipelineState(fillPipeline2)
             fillEncoderR.setTexture(rightEye, index: 0)
-            fillEncoderR.setTexture(depth, index: 1)
+            fillEncoderR.setTexture(smoothedDepth, index: 1)
             params.withUnsafeBytes { ptr in
                 fillEncoderR.setBytes(ptr.baseAddress!, length: MemoryLayout<Float>.stride * 11, index: 4)
             }
@@ -208,6 +243,14 @@ public class StereoComposer {
     }
 
     /// Apply depth feathering around depth map edges.
+    ///
+    /// - Deprecated: This CPU implementation was a no-op stub (it only memcpy'd the buffer
+    ///   unchanged) and was never called anywhere in `compose()`. Edge-aware depth smoothing
+    ///   is now done properly on the GPU via the `bilateralFilterDepth` Metal kernel
+    ///   (see StereoWarp.metal), which runs automatically as part of `compose()` before the
+    ///   stereo warp samples the depth map. This method is kept only for public-API source
+    ///   compatibility and should not be used — it does nothing useful.
+    @available(*, deprecated, message: "No-op; depth smoothing now runs on GPU inside compose() via bilateralFilterDepth")
     public func applyDepthFeathering(depthMap: CVPixelBuffer) -> CVPixelBuffer {
         let width = CVPixelBufferGetWidth(depthMap)
         let height = CVPixelBufferGetHeight(depthMap)
