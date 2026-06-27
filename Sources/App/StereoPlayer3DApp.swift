@@ -3,6 +3,7 @@ import MetalKit
 import AVFoundation
 import UniformTypeIdentifiers
 import Darwin
+import Combine
 
 // MARK: - Main App Entry Point
 
@@ -46,24 +47,67 @@ struct StereoPlayer3DApp: App {
             }
             
             CommandMenu("Stereo") {
+                Picker("3D Effect", selection: $appDelegate.appState.stereoPreset) {
+                    Text("Normal").tag(StereoPreset.normal)
+                    Text("Wide").tag(StereoPreset.wide)
+                }
+                .pickerStyle(.inline)
+                .onChange(of: appDelegate.appState.stereoPreset) { preset in
+                    appDelegate.applyStereoPreset(preset)
+                }
+            }
+
+            CommandMenu("Debug") {
+                Button("Record Test Harness (5s)") {
+                    appDelegate.startTestHarness()
+                }
+
+                Divider()
+
                 Slider(value: $appDelegate.appState.baseline, in: 0...200) {
                     Text("Baseline")
                 }
-                
+                .onChange(of: appDelegate.appState.baseline) { v in
+                    appDelegate.metalRenderer?.updateBaseline(v)
+                }
+
                 Slider(value: $appDelegate.appState.focalLength, in: 200...1000) {
                     Text("Focal Length")
                 }
-                
+                .onChange(of: appDelegate.appState.focalLength) { v in
+                    appDelegate.metalRenderer?.updateFocalLength(v)
+                }
+
                 Picker("Fill Mode", selection: $appDelegate.appState.fillMode) {
                     Text("Nearest").tag(StereoComposer.FillMode.nearest)
                     Text("Mirror").tag(StereoComposer.FillMode.mirror)
                     Text("Color").tag(StereoComposer.FillMode.color)
                 }
-            }
-            
-            CommandMenu("Debug") {
-                Button("Record Test Harness (5s)") {
-                    appDelegate.startTestHarness()
+                .onChange(of: appDelegate.appState.fillMode) { v in
+                    appDelegate.metalRenderer?.updateFillMode(v)
+                }
+
+                Divider()
+
+                Slider(value: $appDelegate.appState.dilationSigma, in: 0.5...6.0) {
+                    Text("Blur σ \(String(format: "%.1f", appDelegate.appState.dilationSigma))")
+                }
+                .onChange(of: appDelegate.appState.dilationSigma) { _ in
+                    appDelegate.applyDepthDilation()
+                }
+
+                Slider(value: $appDelegate.appState.dilationRadiusH, in: 1...20) {
+                    Text("Dilation H \(Int(appDelegate.appState.dilationRadiusH))")
+                }
+                .onChange(of: appDelegate.appState.dilationRadiusH) { _ in
+                    appDelegate.applyDepthDilation()
+                }
+
+                Slider(value: $appDelegate.appState.dilationRadiusV, in: 1...12) {
+                    Text("Dilation V \(Int(appDelegate.appState.dilationRadiusV))")
+                }
+                .onChange(of: appDelegate.appState.dilationRadiusV) { _ in
+                    appDelegate.applyDepthDilation()
                 }
             }
         }
@@ -119,6 +163,20 @@ extension AppDelegate {
     }
 }
 
+// MARK: - Stereo Preset
+
+enum StereoPreset: Equatable {
+    case normal
+    case wide
+
+    var baselineValue: Float {
+        switch self {
+        case .normal: return 16.0
+        case .wide:   return 48.0
+        }
+    }
+}
+
 // MARK: - App State (Observable Object)
 
 final class AppState: ObservableObject {
@@ -128,9 +186,14 @@ final class AppState: ObservableObject {
     @Published var fps: Double = 0
     @Published var latency: Double = 0
     @Published var videoInfo: String = "No video loaded"
-    @Published var baseline: Float = 64.0
+    @Published var stereoPreset: StereoPreset = .normal
+    @Published var baseline: Float = 16.0
     @Published var focalLength: Float = 512.0
     @Published var fillMode: StereoComposer.FillMode = .nearest
+    // Depth dilation parameters (tunable in Debug menu)
+    @Published var dilationSigma: Float = 2.0
+    @Published var dilationRadiusH: Float = 5
+    @Published var dilationRadiusV: Float = 3
     
     // Pipeline status
     @Published var pipelineStatus: String = "Ready"
@@ -145,15 +208,29 @@ final class AppState: ObservableObject {
 
 // MARK: - App Delegate
 
+@MainActor
 final class AppDelegate: NSObject, ObservableObject {
     @Published var appState = AppState()
     var metalRenderer: MetalRendererView?
     var rayNeoMonitor: RayNeoDisplayMonitor?
-    
+    private var cancellables = Set<AnyCancellable>()
+
     #if STEREO_AUTOPLAY
     static let autoPlayURL = URL(fileURLWithPath: "test.mp4")
     #endif
-    
+
+    override init() {
+        super.init()
+        // Keep StereoComposer in sync whenever the preset changes via the menu.
+        appState.$stereoPreset
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] preset in
+                self?.metalRenderer?.updateBaseline(preset.baselineValue)
+                self?.appState.baseline = preset.baselineValue
+            }
+            .store(in: &cancellables)
+    }
+
     func showOpenPanel() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [
@@ -175,23 +252,12 @@ final class AppDelegate: NSObject, ObservableObject {
             appState.pipelineStatus = "Error: MetalRenderer not ready"
             return
         }
-
         renderer.loadVideo(at: url, startPlayback: false)
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            let info = renderer.videoInfo
-            DispatchQueue.main.async {
-                self.appState.updateVideoInfo(
-                    width: info.width,
-                    height: info.height,
-                    codec: info.codec,
-                    fps: info.fps,
-                    duration: info.duration
-                )
-                self.appState.pipelineStatus = "Video loaded — press Space to play"
-                self.appState.isPlaying = false
-            }
-        }
+        let info = renderer.videoInfo
+        appState.updateVideoInfo(width: info.width, height: info.height,
+                                 codec: info.codec, fps: info.fps, duration: info.duration)
+        appState.pipelineStatus = "Video loaded — press Space to play"
+        appState.isPlaying = false
     }
     
     /// DEBUG: Auto-load video and start playback immediately.
@@ -201,28 +267,13 @@ final class AppDelegate: NSObject, ObservableObject {
             appState.pipelineStatus = "Error: MetalRenderer not ready"
             return
         }
-        
         renderer.loadVideo(at: url)
-        
-        logDebug("AUTOPLAY async after video load\n")
-        DispatchQueue.global(qos: .userInitiated).async {
-            logDebug("AUTOPLAY bg thread get videoInfo\n")
-            let info = renderer.videoInfo
-            logDebug("AUTOPLAY bg thread got videoInfo\n")
-            DispatchQueue.main.async {
-                logDebug("AUTOPLAY main thread update and start\n")
-                self.appState.updateVideoInfo(
-                    width: info.width,
-                    height: info.height,
-                    codec: info.codec,
-                    fps: info.fps,
-                    duration: info.duration
-                )
-                self.appState.pipelineStatus = "Auto-playing \(url.lastPathComponent)"
-                self.appState.isPlaying = true
-                renderer.start()
-            }
-        }
+        let info = renderer.videoInfo
+        appState.updateVideoInfo(width: info.width, height: info.height,
+                                 codec: info.codec, fps: info.fps, duration: info.duration)
+        appState.pipelineStatus = "Auto-playing \(url.lastPathComponent)"
+        appState.isPlaying = true
+        renderer.start()
     }
     
     func togglePlayback() {
@@ -246,18 +297,35 @@ final class AppDelegate: NSObject, ObservableObject {
         renderer.seek(to: appState.playbackPosition)
     }
 
+    func applyStereoPreset(_ preset: StereoPreset) {
+        appState.baseline = preset.baselineValue
+        metalRenderer?.updateBaseline(preset.baselineValue)
+    }
+
+    func applyDepthDilation() {
+        metalRenderer?.updateDepthDilation(
+            sigma: appState.dilationSigma,
+            radiusH: Int(appState.dilationRadiusH),
+            radiusV: Int(appState.dilationRadiusV)
+        )
+    }
+
     /// Start monitoring for RayNeo Air 4 Pro display.
     func startRayNeoDisplayMonitoring() {
         let monitor = RayNeoDisplayMonitor()
-        monitor.didFindDisplay = { [weak self] screen in
-            logDebug("RAYNEO: display found — moving window\n")
-            guard let window = NSApplication.shared.mainWindow else { return }
-            monitor.moveWindowToScreen(window, screen: screen)
+        monitor.didFindDisplay = { [weak monitor] screen in
+            DispatchQueue.main.async {
+                logDebug("RAYNEO: display found — moving window\n")
+                guard let window = NSApplication.shared.mainWindow else { return }
+                monitor?.moveWindowToScreen(window, screen: screen)
+            }
         }
-        monitor.didLosingDisplay = { _ in
-            logDebug("RAYNEO: display lost — returning to main screen\n")
-            guard let window = NSApplication.shared.mainWindow else { return }
-            monitor.moveWindowToMainScreen(window)
+        monitor.didLosingDisplay = { [weak monitor] in
+            DispatchQueue.main.async {
+                logDebug("RAYNEO: display lost — returning to main screen\n")
+                guard let window = NSApplication.shared.mainWindow else { return }
+                monitor?.moveWindowToMainScreen(window)
+            }
         }
         monitor.startPolling()
         self.rayNeoMonitor = monitor

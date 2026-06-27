@@ -152,11 +152,23 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
     // MARK: - Configuration Updates
 
-    public func updateBaseline(_ baseline: Float) {}
+    public func updateBaseline(_ baseline: Float) {
+        stereoComposer?.baseline = baseline
+    }
 
-    public func updateFocalLength(_ focalLength: Float) {}
+    public func updateFocalLength(_ focalLength: Float) {
+        stereoComposer?.focalLength = focalLength
+    }
 
-    public func updateFillMode(_ fillMode: StereoComposer.FillMode) {}
+    public func updateFillMode(_ fillMode: StereoComposer.FillMode) {
+        stereoComposer?.fillMode = fillMode
+    }
+
+    public func updateDepthDilation(sigma: Float, radiusH: Int, radiusV: Int) {
+        depthEstimator?.dilationSigma = sigma
+        depthEstimator?.dilationRadiusH = radiusH
+        depthEstimator?.dilationRadiusV = radiusV
+    }
 
     // MARK: - Video Playback
 

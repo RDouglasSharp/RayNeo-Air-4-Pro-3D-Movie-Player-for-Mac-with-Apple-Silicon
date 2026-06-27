@@ -17,7 +17,7 @@ struct MetalRenderer: NSViewRepresentable {
     }
     
     func sizeThatFits(_ proposal: ProposedViewSize, nsView: NSView, context: Context) -> CGSize? {
-        logDebug("METALRENDER sizeThatFits proposal=\(proposal.width)x\(proposal.height)\n")
+        logDebug("METALRENDER sizeThatFits proposal=\(proposal.width ?? 0)x\(proposal.height ?? 0)\n")
         return nil
     }
 }

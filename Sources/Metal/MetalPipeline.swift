@@ -105,7 +105,7 @@ public class MetalPipeline {
         }
 
         // IOSurface FIRST — CVPixelBufferGetIOSurface does NOT require locking
-        if let surfaceUnmanaged = CVPixelBufferGetIOSurface(pixelBuffer) {
+        if CVPixelBufferGetIOSurface(pixelBuffer) != nil {
             logDebug("createTexture: IOSurface detected, GPU path\n")
             return createTextureFromIOSurface(pixelBuffer: pixelBuffer, width: width, height: height, pixelFormat: pixelFormat)
         }

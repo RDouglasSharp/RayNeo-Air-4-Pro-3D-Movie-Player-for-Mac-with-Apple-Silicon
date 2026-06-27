@@ -1,0 +1,37 @@
+Building...
+[0/1] Planning build
+Building for production...
+[0/3] Write sources
+[1/3] Write swift-version--1AB21518FC5DEDBE.txt
+[3/4] Compiling StereoPlayer3D StereoPlayer3DApp.swift
+/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift:121:75: warning: type 'Any' does not conform to the 'Sendable' protocol
+119 |             kCVPixelBufferMetalCompatibilityKey as String: true
+120 |         ]
+121 |         let output = AVPlayerItemVideoOutput(pixelBufferAttributes: attrs as [String: Any])
+    |                                                                           `- warning: type 'Any' does not conform to the 'Sendable' protocol
+122 |         output.suppressesPlayerRendering = true // we own presentation; AVPlayer shouldn't also draw
+123 |         item.add(output)
+
+/Users/doug/Code/StereoPlayer3D/Sources/Core/SyncedVideoPlayer.swift:233:37: warning: capture of 'processed' with non-Sendable type 'CVPixelBuffer' (aka 'CVBuffer') in a '@Sendable' closure [#SendableClosureCaptures]
+231 |             let capturedTime = displayTime
+232 |             DispatchQueue.main.async {
+233 |                 self.frameRenderer?(processed, capturedTime)
+    |                                     `- warning: capture of 'processed' with non-Sendable type 'CVPixelBuffer' (aka 'CVBuffer') in a '@Sendable' closure [#SendableClosureCaptures]
+234 |             }
+235 |         }
+
+CoreVideo.CVBuffer:1:14: note: class 'CVBuffer' does not conform to the 'Sendable' protocol
+1 | public class CVBuffer : _CFObject {
+  |              `- note: class 'CVBuffer' does not conform to the 'Sendable' protocol
+2 | }
+
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[3/5] Write Objects.LinkFileList
+[4/5] Linking StereoPlayer3D
+Build complete! (2.19s)
+Copied Core ML model
+Copied Metal shader: StereoWarp.metal
+/Users/doug/Code/StereoPlayer3D/StereoPlayer3D.app: replacing existing signature
+Signed app bundle
+Deployed to: /Users/doug/Code/StereoPlayer3D/StereoPlayer3D.app
+Launch with: open '/Users/doug/Code/StereoPlayer3D/StereoPlayer3D.app'

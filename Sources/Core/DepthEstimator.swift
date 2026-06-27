@@ -19,6 +19,12 @@ public final class DepthEstimator {
     let targetSize = CGSize(width: 518, height: 392)
     private var debugCount = 0
 
+    // Dilation parameters — tunable at runtime via the Debug menu.
+    // Applied at model resolution (518×392); radiusH=5, radiusV=3, sigma=2.0 fixed the arm halo.
+    var dilationSigma: Float = 2.0
+    var dilationRadiusH: Int = 5
+    var dilationRadiusV: Int = 3
+
     public init() throws {
         guard let modelURL = Bundle.main.url(
             forResource: "DepthAnythingV2SmallF16",
@@ -114,12 +120,29 @@ public final class DepthEstimator {
         }
         CVPixelBufferUnlockBaseAddress(depthBuffer, .readOnly)
 
+        // Normalize to [0,1] so dilation and upsampling work on a consistent scale.
+        let rawMin = smallDepth.min() ?? 0
+        let rawMax = smallDepth.max() ?? 1
+        let rawRange = rawMax - rawMin
         if debugCount == 0 {
-            let minVal = smallDepth.min() ?? 0
-            let maxVal = smallDepth.max() ?? 0
-            let nanCount = smallDepth.filter { !$0.isFinite }.count
-            logDebug("DEPTH VALUES[0]: min=\(minVal) max=\(maxVal) nanCount=\(nanCount)/\(smallDepth.count)\n")
+            logDebug("DEPTH VALUES[0]: raw min=\(rawMin) max=\(rawMax) range=\(rawRange)\n")
             debugCount += 1
+        }
+        if rawRange > 0 {
+            for i in 0..<smallDepth.count {
+                smallDepth[i] = (smallDepth[i] - rawMin) / rawRange
+            }
+        }
+
+        // Gaussian blur → max-pool → max(original, dilated).
+        // Pushes near (high) depth values outward past the ViT patch boundary blur zone,
+        // eliminating the halo artifact at foreground/background edges.
+        // radiusH=5, radiusV=3 at 518×392 model resolution ≈ 19×11px at full 1920×1080.
+        let blurred = gaussianBlurFloat(smallDepth, width: modelW, height: modelH, sigma: dilationSigma)
+        let dilated = dilateMaxFloat(blurred, width: modelW, height: modelH,
+                                     radiusH: dilationRadiusH, radiusV: dilationRadiusV)
+        for i in 0..<smallDepth.count {
+            smallDepth[i] = max(smallDepth[i], dilated[i])
         }
 
         let byteCount = width * height * 4
@@ -352,5 +375,79 @@ extension DepthEstimator {
         }
 
         return output
+    }
+}
+
+// MARK: - Depth Dilation Helpers
+
+private extension DepthEstimator {
+    /// Separable Gaussian blur on a Float array at model resolution.
+    func gaussianBlurFloat(_ data: [Float], width: Int, height: Int, sigma: Float = 1.0) -> [Float] {
+        let radius = Int(ceil(sigma * 2.5))
+        let kSize = 2 * radius + 1
+        var k = [Float](repeating: 0, count: kSize)
+        var sum: Float = 0
+        for i in 0..<kSize {
+            let x = Float(i - radius)
+            k[i] = exp(-0.5 * x * x / (sigma * sigma))
+            sum += k[i]
+        }
+        for i in 0..<kSize { k[i] /= sum }
+
+        // Horizontal pass
+        var h = [Float](repeating: 0, count: width * height)
+        for y in 0..<height {
+            let row = y * width
+            for x in 0..<width {
+                var s: Float = 0
+                for d in -radius...radius {
+                    s += data[row + max(0, min(width - 1, x + d))] * k[d + radius]
+                }
+                h[row + x] = s
+            }
+        }
+
+        // Vertical pass
+        var result = [Float](repeating: 0, count: width * height)
+        for y in 0..<height {
+            for x in 0..<width {
+                var s: Float = 0
+                for d in -radius...radius {
+                    s += h[max(0, min(height - 1, y + d)) * width + x] * k[d + radius]
+                }
+                result[y * width + x] = s
+            }
+        }
+        return result
+    }
+
+    /// Separable max-pool dilation — expands the "near" (high-value) region outward.
+    func dilateMaxFloat(_ data: [Float], width: Int, height: Int,
+                        radiusH: Int, radiusV: Int) -> [Float] {
+        // Horizontal pass
+        var h = [Float](repeating: 0, count: width * height)
+        for y in 0..<height {
+            let rowBase = y * width
+            for x in 0..<width {
+                let lo = max(0, x - radiusH)
+                let hi = min(width - 1, x + radiusH)
+                var m = data[rowBase + lo]
+                for dx in (lo + 1)...hi { m = max(m, data[rowBase + dx]) }
+                h[rowBase + x] = m
+            }
+        }
+
+        // Vertical pass
+        var result = [Float](repeating: 0, count: width * height)
+        for x in 0..<width {
+            for y in 0..<height {
+                let lo = max(0, y - radiusV)
+                let hi = min(height - 1, y + radiusV)
+                var m = h[lo * width + x]
+                for dy in (lo + 1)...hi { m = max(m, h[dy * width + x]) }
+                result[y * width + x] = m
+            }
+        }
+        return result
     }
 }

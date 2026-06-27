@@ -10,9 +10,9 @@ public class StereoComposer {
     var leftTexture: MTLTexture?
     var rightTexture: MTLTexture?
 
-    let baseline: Float
-    let focalLength: Float
-    let fillMode: FillMode
+    var baseline: Float
+    var focalLength: Float
+    var fillMode: FillMode
 
     public enum FillMode {
         case nearest

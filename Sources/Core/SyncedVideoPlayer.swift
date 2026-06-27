@@ -9,7 +9,7 @@ import QuartzCore
 /// Audio plays natively through `AVPlayer`'s own audio pipeline; video frames are pulled
 /// on demand for whatever time the audio clock is *actually* at right now, so a slow
 /// frame never accumulates lag — the next callback just asks for a later frame.
-public final class SyncedVideoPlayer {
+public final class SyncedVideoPlayer: @unchecked Sendable {
 
     // MARK: - Public types
 
@@ -114,11 +114,11 @@ public final class SyncedVideoPlayer {
         let item = AVPlayerItem(asset: asset)
 
         // Pull buffers in a format Metal/CoreML can consume directly without conversion.
-        let attrs: [String: Any] = [
+        let attrs: [String: any Sendable] = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
             kCVPixelBufferMetalCompatibilityKey as String: true
         ]
-        let output = AVPlayerItemVideoOutput(pixelBufferAttributes: attrs)
+        let output = AVPlayerItemVideoOutput(pixelBufferAttributes: attrs as [String: Any])
         output.suppressesPlayerRendering = true // we own presentation; AVPlayer shouldn't also draw
         item.add(output)
         self.videoOutput = output
@@ -228,8 +228,9 @@ public final class SyncedVideoPlayer {
 
             let processed = self.frameProcessor?(pixelBuffer, displayTime) ?? pixelBuffer
 
+            let capturedTime = displayTime
             DispatchQueue.main.async {
-                self.frameRenderer?(processed, displayTime)
+                self.frameRenderer?(processed, capturedTime)
             }
         }
     }

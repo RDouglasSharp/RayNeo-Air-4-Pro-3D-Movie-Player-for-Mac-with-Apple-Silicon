@@ -228,7 +228,7 @@ public class TestHarnessRecorder {
     public func startRecording(width: Int, height: Int, fps: Double) throws {
         guard assetWriter == nil else { throw TestHarnessError.alreadyStarted }
 
-        let outputSize = CGSize(width: width, height: height)
+        _ = CGSize(width: width, height: height) // dimensions captured in settings below
 
         // H.264 video with high quality for validation
         let targetBitrate = Int(

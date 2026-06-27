@@ -6,7 +6,7 @@ import Cocoa
 ///   - Display is NOT the main screen
 ///   - Screens are NOT mirrored (different resolutions)
 /// Falls back to main screen at default size when glasses disconnect.
-final class RayNeoDisplayMonitor {
+final class RayNeoDisplayMonitor: @unchecked Sendable {
     private let targetWidth: CGFloat = 3840
     private let targetHeight: CGFloat = 1080
     private var pollingTimer: Timer?
@@ -14,7 +14,7 @@ final class RayNeoDisplayMonitor {
     private var isPinned = false
 
     public var didFindDisplay: ((NSScreen) -> Void)?
-    public var didLosingDisplay: ((Void) -> Void)?
+    public var didLosingDisplay: (() -> Void)?
 
     /// Start polling for the RayNeo display.
     func startPolling() {
@@ -103,13 +103,11 @@ final class RayNeoDisplayMonitor {
     }
 
     private func notifyLoss() {
-        if let handler = didLosingDisplay {
-            handler(Void())
-        }
+        didLosingDisplay?()
     }
 
     /// Move a window to the target screen and go fullscreen.
-    func moveWindowToScreen(_ window: NSWindow, screen: NSScreen) {
+    @MainActor func moveWindowToScreen(_ window: NSWindow, screen: NSScreen) {
         let targetFrame = screen.frame
         window.collectionBehavior = [.fullScreenNone]
         window.setFrame(targetFrame, display: true, animate: true)
@@ -121,7 +119,7 @@ final class RayNeoDisplayMonitor {
     }
 
     /// Move window back to main screen at default size, exit fullscreen.
-    func moveWindowToMainScreen(_ window: NSWindow) {
+    @MainActor func moveWindowToMainScreen(_ window: NSWindow) {
         if window.styleMask.contains(.fullScreen) {
             window.toggleFullScreen(nil)
         }
