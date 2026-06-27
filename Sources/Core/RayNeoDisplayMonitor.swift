@@ -106,26 +106,31 @@ final class RayNeoDisplayMonitor: @unchecked Sendable {
         didLosingDisplay?()
     }
 
-    /// Move a window to the target screen and go fullscreen.
+    /// Move a window to the target screen, filling it without entering macOS fullscreen mode.
+    ///
+    /// Avoiding toggleFullScreen keeps the window in the normal window hierarchy so that:
+    ///   - NSOpenPanel / menu bar interactions work from the main screen
+    ///   - Traffic lights (close / minimize / zoom) remain accessible
+    ///   - No separate Space is created that traps keyboard/menu focus
+    ///
+    /// The title bar is made transparent and content is extended under it so the video
+    /// fills the full 3840×1080 frame while the traffic lights still float in the corner.
     @MainActor func moveWindowToScreen(_ window: NSWindow, screen: NSScreen) {
-        let targetFrame = screen.frame
-        window.collectionBehavior = [.fullScreenNone]
-        window.setFrame(targetFrame, display: true, animate: true)
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        window.level = .normal
+        window.styleMask.insert(.fullSizeContentView)
+        window.titlebarAppearsTransparent = true
+        window.title = ""
+        window.setFrame(screen.frame, display: true, animate: false)
         window.makeKeyAndOrderFront(nil)
-
-        window.collectionBehavior = [.fullScreenPrimary]
-        window.level = .floating
-        window.toggleFullScreen(nil)
     }
 
-    /// Move window back to main screen at default size, exit fullscreen.
+    /// Move window back to main screen at a normal size and restore the title bar.
     @MainActor func moveWindowToMainScreen(_ window: NSWindow) {
-        if window.styleMask.contains(.fullScreen) {
-            window.toggleFullScreen(nil)
-        }
-
         window.collectionBehavior = [.fullScreenNone]
         window.level = .normal
+        window.styleMask.remove(.fullSizeContentView)
+        window.titlebarAppearsTransparent = false
 
         let mainScreen = NSScreen.main ?? NSScreen.screens[0]
         var targetSize = CGSize(width: 900, height: 379)
@@ -135,12 +140,10 @@ final class RayNeoDisplayMonitor: @unchecked Sendable {
                 height: min(targetSize.height, mainScreen.frame.height * 0.9)
             )
         }
-
         let origin = CGPoint(
             x: mainScreen.frame.midX - targetSize.width / 2,
             y: mainScreen.frame.midY - targetSize.height / 2
         )
-
         window.setFrame(NSRect(origin: origin, size: targetSize), display: true, animate: true)
         window.makeKeyAndOrderFront(nil)
     }

@@ -89,7 +89,7 @@ struct StereoPlayer3DApp: App {
 
                 Divider()
 
-                Slider(value: $appDelegate.appState.dilationSigma, in: 0.5...6.0) {
+                Slider(value: $appDelegate.appState.dilationSigma, in: 0.5...12.0) {
                     Text("Blur σ \(String(format: "%.1f", appDelegate.appState.dilationSigma))")
                 }
                 .onChange(of: appDelegate.appState.dilationSigma) { _ in
