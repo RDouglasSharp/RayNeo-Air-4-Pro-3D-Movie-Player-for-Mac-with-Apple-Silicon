@@ -18,6 +18,7 @@ struct StereoPlayer3DApp: App {
                 .environmentObject(appDelegate.appState)
                 .frame(minWidth: 320, minHeight: 180)
         }
+        .defaultSize(width: 960, height: 560)
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandMenu("Playback") {
@@ -252,6 +253,10 @@ final class AppDelegate: NSObject, ObservableObject {
             appState.pipelineStatus = "Error: MetalRenderer not ready"
             return
         }
+        renderer.onTimeUpdate = { [weak self] t, d in
+            self?.appState.playbackPosition = t
+            if d > 0 { self?.appState.duration = d }
+        }
         renderer.loadVideo(at: url, startPlayback: false)
         let info = renderer.videoInfo
         appState.updateVideoInfo(width: info.width, height: info.height,
@@ -266,6 +271,10 @@ final class AppDelegate: NSObject, ObservableObject {
         guard let renderer = metalRenderer else {
             appState.pipelineStatus = "Error: MetalRenderer not ready"
             return
+        }
+        renderer.onTimeUpdate = { [weak self] t, d in
+            self?.appState.playbackPosition = t
+            if d > 0 { self?.appState.duration = d }
         }
         renderer.loadVideo(at: url)
         let info = renderer.videoInfo

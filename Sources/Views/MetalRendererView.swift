@@ -39,6 +39,10 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
     var lastDepth: CVPixelBuffer?
     var fpsLabel: NSTextField?
 
+    /// Called on the main thread with (currentTime, duration) in seconds each rendered frame.
+    /// Duration is read live from the player so it's always valid once frames are flowing.
+    var onTimeUpdate: ((_ time: Double, _ duration: Double) -> Void)?
+
     // MARK: - Test Mode Configuration
 
     /// Activate test harness mode: render SBS to file, collect timing report.
@@ -192,6 +196,7 @@ final class MetalRendererView: MTKView, MTKViewDelegate {
 
         syncPlayer?.frameRenderer = { [weak self] _buffer, _time in
             guard let self = self else { return }
+            self.onTimeUpdate?(_time.seconds, self.syncPlayer?.duration.seconds ?? 0)
             self.renderCounter += 1
             let now = CACurrentMediaTime()
             if Int(now) != Int(self.renderSecond) {

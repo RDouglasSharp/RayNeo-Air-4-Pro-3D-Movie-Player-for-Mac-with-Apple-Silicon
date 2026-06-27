@@ -28,7 +28,7 @@ CoreVideo.CVBuffer:1:14: note: class 'CVBuffer' does not conform to the 'Sendabl
 [#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
 [3/5] Write Objects.LinkFileList
 [4/5] Linking StereoPlayer3D
-Build complete! (2.18s)
+Build complete! (2.23s)
 Copied Core ML model
 Copied Metal shader: StereoWarp.metal
 /Users/doug/Code/StereoPlayer3D/StereoPlayer3D.app: replacing existing signature
