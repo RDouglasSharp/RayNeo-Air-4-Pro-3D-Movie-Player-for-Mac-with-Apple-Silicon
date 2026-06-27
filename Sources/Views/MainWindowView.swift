@@ -7,6 +7,7 @@ struct MainWindowView: View {
     @EnvironmentObject var appDelegate: AppDelegate
     @ObservedObject var appState: AppState
     @State private var isPlaying: Bool = false
+    @State private var scrubPosition: Double? = nil  // non-nil only while dragging
 
     init(appState: AppState) {
         self.appState = appState
@@ -19,14 +20,46 @@ struct MainWindowView: View {
             MetalRenderer()
                 .background(Color.black)
 
-            // Progress bar — read-only position indicator (phase 1)
-            ProgressView(value: appState.playbackPosition,
-                         total: appState.duration > 0 ? appState.duration : 1)
-                .progressViewStyle(.linear)
-                .tint(.green)
-                .frame(height: 3)
-                .padding(.horizontal, 0)
-                .animation(.none, value: appState.playbackPosition)
+            // Scrubber bar — drag to seek, releases trigger a single seek call.
+            GeometryReader { geo in
+                let duration = appState.duration > 0 ? appState.duration : 1
+                let displayPos = scrubPosition ?? appState.playbackPosition
+                let progress = max(0, min(1, displayPos / duration))
+
+                ZStack(alignment: .leading) {
+                    // Track
+                    Rectangle()
+                        .fill(Color.white.opacity(0.15))
+                        .frame(height: 3)
+                    // Fill
+                    Rectangle()
+                        .fill(Color.green)
+                        .frame(width: geo.size.width * progress, height: 3)
+                    // Thumb — only visible while scrubbing
+                    if scrubPosition != nil {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 10, height: 10)
+                            .offset(x: geo.size.width * progress - 5)
+                    }
+                }
+                .frame(maxHeight: .infinity)   // fill the 16pt hit area
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let fraction = max(0, min(1, value.location.x / geo.size.width))
+                            scrubPosition = fraction * duration
+                        }
+                        .onEnded { value in
+                            let fraction = max(0, min(1, value.location.x / geo.size.width))
+                            appState.playbackPosition = fraction * duration
+                            appDelegate.seekToPosition()
+                            scrubPosition = nil
+                        }
+                )
+            }
+            .frame(height: 16)  // tall hit target; bar itself is 3pt inside
 
             // Playback controls bar
             HStack {
